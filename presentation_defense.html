@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Защита проекта: Советская повседневность</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=PT+Sans:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --soviet-red: #CC0000;
+            --soviet-dark-red: #8B0000;
+            --soviet-gold: #FFD700;
+            --soviet-cream: #F5F0E6;
+            --soviet-dark: #1a1a1a;
+            --soviet-gray: #3a3a3a;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body {
+            font-family: 'PT Sans', sans-serif;
+            background: var(--soviet-dark);
+            color: var(--soviet-cream);
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+        }
+        .slide {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 3rem 5rem;
+            transition: opacity 0.5s ease;
+        }
+        .slide.active { display: flex; }
+        .slide-bg-dark {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+        }
+        .slide-bg-red {
+            background: linear-gradient(135deg, #8B0000 0%, #CC0000 50%, #a00000 100%);
+        }
+        .slide-bg-cream {
+            background: var(--soviet-cream);
+            color: var(--soviet-dark);
+        }
+        .slide-bg-gray {
+            background: linear-gradient(135deg, #2a2a2a 0%, #3a3a3a 100%);
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2rem, 4vw, 3.5rem);
+            font-weight: 900;
+            color: var(--soviet-gold);
+            text-align: center;
+            margin-bottom: 1rem;
+            text-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+        h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(1.5rem, 3vw, 2.5rem);
+            font-weight: 700;
+            color: var(--soviet-gold);
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(1.2rem, 2vw, 1.8rem);
+            color: var(--soviet-gold);
+            margin-bottom: 1rem;
+        }
+
+        .subtitle {
+            font-size: clamp(1rem, 1.5vw, 1.4rem);
+            color: rgba(255,255,255,0.85);
+            text-align: center;
+            max-width: 800px;
+            line-height: 1.6;
+        }
+        .year-badge {
+            display: inline-block;
+            padding: 0.5rem 2rem;
+            border: 2px solid var(--soviet-gold);
+            color: var(--soviet-gold);
+            font-size: 1.2rem;
+            letter-spacing: 4px;
+            margin-bottom: 1.5rem;
+        }
+
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            width: 100%;
+            max-width: 1100px;
+            align-items: start;
+        }
+        .col {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .highlight-box {
+            background: rgba(204,0,0,0.15);
+            border-left: 4px solid var(--soviet-red);
+            padding: 1.2rem 1.5rem;
+            border-radius: 0 8px 8px 0;
+            margin: 0.5rem 0;
+        }
+        .highlight-box h4 {
+            color: var(--soviet-gold);
+            font-family: 'Playfair Display', serif;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+        .highlight-box p, .highlight-box li {
+            color: rgba(255,255,255,0.9);
+            line-height: 1.6;
+            font-size: 0.95rem;
+        }
+        .highlight-box ul { padding-left: 1.2rem; }
+        .highlight-box li { margin-bottom: 0.3rem; }
+
+        .stat-row {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            margin: 2rem 0;
+            flex-wrap: wrap;
+        }
+        .stat-item {
+            text-align: center;
+        }
+        .stat-number {
+            font-family: 'Playfair Display', serif;
+            font-size: 3rem;
+            color: var(--soviet-gold);
+            font-weight: 900;
+        }
+        .stat-label {
+            color: rgba(255,255,255,0.7);
+            font-size: 0.9rem;
+            margin-top: 0.3rem;
+        }
+
+        .feature-list {
+            list-style: none;
+            padding: 0;
+            max-width: 700px;
+        }
+        .feature-list li {
+            padding: 0.6rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+            font-size: 1.1rem;
+            line-height: 1.5;
+        }
+        .feature-list li::before {
+            content: "▸";
+            position: absolute;
+            left: 0;
+            color: var(--soviet-red);
+            font-weight: bold;
+        }
+
+        .quote-box {
+            background: rgba(0,0,0,0.3);
+            border-left: 4px solid var(--soviet-gold);
+            padding: 1.5rem 2rem;
+            font-style: italic;
+            font-size: 1.1rem;
+            max-width: 700px;
+            margin: 1rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .quote-author {
+            margin-top: 0.8rem;
+            font-style: normal;
+            font-size: 0.9rem;
+            color: rgba(255,215,0,0.7);
+        }
+
+        .source-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            max-width: 900px;
+            width: 100%;
+        }
+        .source-card {
+            background: rgba(255,255,255,0.05);
+            padding: 1rem 1.2rem;
+            border-radius: 8px;
+            border-left: 3px solid var(--soviet-red);
+        }
+        .source-card h5 {
+            color: var(--soviet-gold);
+            font-size: 0.85rem;
+            margin-bottom: 0.3rem;
+        }
+        .source-card p {
+            color: rgba(255,255,255,0.7);
+            font-size: 0.8rem;
+            line-height: 1.5;
+        }
+
+        .nav-controls {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 1rem;
+            z-index: 100;
+            background: rgba(0,0,0,0.6);
+            padding: 0.8rem 1.5rem;
+            border-radius: 30px;
+            backdrop-filter: blur(10px);
+        }
+        .nav-btn {
+            background: transparent;
+            border: 2px solid var(--soviet-gold);
+            color: var(--soviet-gold);
+            padding: 0.5rem 1.2rem;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+            font-family: 'PT Sans', sans-serif;
+        }
+        .nav-btn:hover {
+            background: var(--soviet-gold);
+            color: var(--soviet-dark);
+        }
+        .slide-counter {
+            color: rgba(255,255,255,0.6);
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            padding: 0 0.5rem;
+        }
+
+        .progress-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            height: 4px;
+            background: var(--soviet-red);
+            transition: width 0.3s;
+            z-index: 100;
+        }
+
+        .timer {
+            position: fixed;
+            top: 20px;
+            right: 30px;
+            background: rgba(0,0,0,0.5);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            color: var(--soviet-gold);
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2rem;
+            z-index: 100;
+        }
+
+        .icon-large {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .conclusion-box {
+            background: rgba(204,0,0,0.2);
+            border: 2px solid var(--soviet-red);
+            border-radius: 12px;
+            padding: 2rem;
+            max-width: 800px;
+            text-align: center;
+        }
+        .conclusion-box h3 {
+            margin-bottom: 1rem;
+        }
+        .conclusion-box p {
+            font-size: 1.1rem;
+            line-height: 1.7;
+            color: rgba(255,255,255,0.9);
+        }
+
+        @media (max-width: 768px) {
+            .slide { padding: 2rem 1.5rem; }
+            .two-col { grid-template-columns: 1fr; gap: 1.5rem; }
+            .source-grid { grid-template-columns: 1fr; }
+            .stat-row { gap: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="progress-bar" id="progress-bar" style="width: 0%"></div>
+
+<!-- СЛАЙД 1: Титульный -->
+<div class="slide slide-bg-dark active" data-slide="0">
+    <div class="year-badge">1917 — 1991</div>
+    <h1>Советская повседневность</h1>
+    <p class="subtitle">Проект по истории СССР<br>Исследование жизни, быта, идеологии и социума</p>
+    <div class="stat-row" style="margin-top: 3rem;">
+        <div class="stat-item">
+            <div class="stat-number">10</div>
+            <div class="stat-label">тематических разделов</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">6+</div>
+            <div class="stat-label">первичных источников</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">15</div>
+            <div class="stat-label">вопросов викторины</div>
+        </div>
+    </div>
+</div>
+
+<!-- СЛАЙД 2: Актуальность -->
+<div class="slide slide-bg-gray" data-slide="1">
+    <h2>🔍 Актуальность и цель</h2>
+    <div class="two-col">
+        <div class="col">
+            <div class="highlight-box">
+                <h4>Почему эта тема важна?</h4>
+                <ul>
+                    <li>Постсоветское пространство — почти 35 лет после распада, но влияние советской эпохи ощущается в быту, менталитете, институтах</li>
+                    <li>Мифологизация: «Всё было хорошо» vs «Всё было плохо» — проект предлагает нюансированный взгляд</li>
+                    <li>Интерактивный формат делает историю доступной для школьников и студентов</li>
+                </ul>
+            </div>
+        </div>
+        <div class="col">
+            <div class="highlight-box">
+                <h4>Цель проекта</h4>
+                <ul>
+                    <li>Показать советскую повседневность как систему, а не набор клише</li>
+                    <li>Сопоставить официальную идеологию с реальностью через первичные источники</li>
+                    <li>Продемонстрировать роль государства в формировании частной жизни</li>
+                    <li>Развить критическое мышление через контрвзгляды и альтернативные интерпретации</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- СЛАЙД 3: Структура -->
+<div class="slide slide-bg-dark" data-slide="2">
+    <h2>📐 Структура проекта</h2>
+    <div class="two-col" style="max-width: 1000px;">
+        <div class="col">
+            <ul class="feature-list">
+                <li><strong>Хронология</strong> — 5 ключевых периодов от 1917 до 1991</li>
+                <li><strong>Быт и материальная культура</strong> — жильё, дефицит, дачи, телевидение</li>
+                <li><strong>Труд и отдых</strong> — коллективы, санатории, автомобили</li>
+                <li><strong>Образование</strong> — школа, пионеры, комсомол, кино</li>
+                <li><strong>Здравоохранение</strong> — система Семашко, материнство, соцгарантии</li>
+            </ul>
+        </div>
+        <div class="col">
+            <ul class="feature-list">
+                <li><strong>Социум</strong> — семья, соседи, номенклатура, «блат»</li>
+                <li><strong>Идеология</strong> — пропаганда, плакаты, СМИ, «двойное сознание»</li>
+                <li><strong>Аномалии</strong> — пьянство, наркотики, проституция, самоубийства</li>
+                <li><strong>Галерея</strong> — 12 фотографий эпохи с подписями</li>
+                <li><strong>Викторина</strong> — 15 вопросов для проверки знаний</li>
+            </ul>
+        </div>
+    </div>
+    <p style="margin-top: 2rem; color: rgba(255,255,255,0.6); font-size: 0.95rem; text-align: center;">Каждый раздел содержит первичные источники, контрвзгляды и ссылки на историографию</p>
+</div>
+
+<!-- СЛАЙД 4: Методология -->
+<div class="slide slide-bg-gray" data-slide="3">
+    <h2>⚙️ Методология и подход</h2>
+    <div class="two-col">
+        <div class="col">
+            <div class="highlight-box">
+                <h4>Источниковая база</h4>
+                <ul>
+                    <li><strong>Первичные:</strong> Конституция 1936 г., доклад Хрущёва 1956 г., статьи Ленина, Указ о кооперации 1988 г., инструкция пионерской организации 1922 г.</li>
+                    <li><strong>Историография:</strong> Ш. Фицпатрик, Н.Б. Лебина, А. Юрчак, Е.А. Фельдман</li>
+                    <li><strong>Визуальные:</strong> фотографии из свободных источников</li>
+                </ul>
+            </div>
+        </div>
+        <div class="col">
+            <div class="highlight-box">
+                <h4>Принцип «контрвзгляда»</h4>
+                <ul>
+                    <li>Каждый позитивный тезис сопровождается критической рефлексией</li>
+                    <li>Жильё как соцгарантия → жильё как орудие принуждения</li>
+                    <li>Бесплатная медицина → хроническое недофинансирование и психиатрия как репрессия</li>
+                    <li>Эффективная пропаганда → «двойное сознание» и прагматический конформизм</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- СЛАЙД 5: Ключевые находки -->
+<div class="slide slide-bg-red" data-slide="4">
+    <h2>💡 Ключевые находки</h2>
+    <div class="two-col" style="max-width: 1000px;">
+        <div class="col">
+            <div class="highlight-box" style="background: rgba(0,0,0,0.2);">
+                <h4>1. Жильё = власть</h4>
+                <p>Система распределения жилья была не социальной гарантией, а механизмом управления. Коммуналка как паноптикум, «хрущёвка» как иллюзия приватности.</p>
+            </div>
+            <div class="highlight-box" style="background: rgba(0,0,0,0.2);">
+                <h4>2. Дефицит как структура</h4>
+                <p>Очереди и «блат» формировали иерархическое общество, где статус определялся близостью к «кормушке».</p>
+            </div>
+        </div>
+        <div class="col">
+            <div class="highlight-box" style="background: rgba(0,0,0,0.2);">
+                <h4>3. Медицина: свет и тень</h4>
+                <p>Система Семашко снизила детскую смертность в 9 раз, но психиатрия использовалась против инакомыслия («вялотекущая шизофрения»).</p>
+            </div>
+<div class="highlight-box" style="background: rgba(0,0,0,0.2);">
+                <h4>4. «Двойное сознание» как выживание</h4>
+                <p>Советский человек одновременно знал официальную ложь и говорил её — не потому что верил, а потому что это был социальный контракт. Юрчак называет это «парадоксом позднего социализма»: система работала, пока все делали вид, что в неё верят.</p>
+            </div>
+                    </div>
+    </div>
+</div>
+
+<!-- СЛАЙД 6: Интерактивность -->
+<div class="slide slide-bg-dark" data-slide="5">
+    <h2>🎮 Интерактивные элементы</h2>
+    <div class="two-col" style="max-width: 900px;">
+        <div class="col">
+            <div class="highlight-box">
+                <h4>📋 Раскрывающиеся карточки</h4>
+                <p>6 тематических блоков с детальной информацией по клику: жилищный вопрос, экономика дефицита, система образования, здравоохранение, пропаганда, аномалии.</p>
+            </div>
+            <div class="highlight-box">
+                <h4>🖼️ Лайтбокс-галерея</h4>
+                <p>12 фотографий эпохи с подписями. Увеличение по клику, плавные переходы.</p>
+            </div>
+        </div>
+        <div class="col">
+            <div class="highlight-box">
+                <h4>❓ Викторина (15 вопросов)</h4>
+                <p>Множественный выбор с пояснениями, система подсчёта баллов, обратная связь. Проверяет знания по всем разделам проекта.</p>
+            </div>
+            <div class="highlight-box">
+                <h4>📜 Первичные источники</h4>
+                <p>6 документов в контексте: Конституция 1936 г., Ленин 1918, Хрущёв 1956, Указ 1988 г. и др.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- СЛАЙД 7: Первичные источники -->
+<div class="slide slide-bg-gray" data-slide="6">
+    <h2>📜 Работа с источниками</h2>
+    <div class="source-grid">
+        <div class="source-card">
+            <h5>В.И. Ленин, 1918</h5>
+            <p>«Хлебная карточка... средство контроля и принуждения к труду посильнее законов Конвента и его гильотины» — обоснование продовольственной монополии</p>
+        </div>
+        <div class="source-card">
+            <h5>Конституция СССР, 1936</h5>
+            <p>Статьи 118–121: право на труд, отдых, материальное обеспечение, образование — закрепление социальных прав на уровне основного закона</p>
+        </div>
+        <div class="source-card">
+            <h5>Н.С. Хрущёв, 1956</h5>
+            <p>Доклад «О культе личности» — начало десталинизации, изменившее повседневность (амнистия, прекращение террора)</p>
+        </div>
+        <div class="source-card">
+            <h5>Указ 1988 г.</h5>
+            <p>«О кооперации в СССР» — легализация частного предпринимательства, изменившая экономику повседневности</p>
+        </div>
+        <div class="source-card">
+            <h5>Пионерская инструкция, 1922</h5>
+            <p>Определение символики и идеологической направленности пионерского движения на десятилетия</p>
+        </div>
+        <div class="source-card">
+            <h5>Историография</h5>
+            <p>Фицпатрик, Лебина, Юрчак, Горский, Фельдман — современные исследования повседневности и социальной истории</p>
+        </div>
+    </div>
+</div>
+
+<!-- СЛАЙД 8: Заключение -->
+<div class="slide slide-bg-red" data-slide="7">
+    <h2>🏁 Заключение</h2>
+    <div class="conclusion-box">
+        <h3>Советская повседневность — это не романтика и не кошмар</h3>
+        <p>Это сложная система, где государство проникало в каждую сферу жизни: от квартиры до мысли. Проект показывает, как идеология материализовалась в быту, как дефицит формировал социальные связи, как «бесплатность» медицины и образования сосуществовала с тотальным контролем.</p>
+        <p style="margin-top: 1rem;">Интерактивный формат позволяет пользователю не просто прочитать, а <strong>исследовать</strong> — сопоставляя официальную риторику с контрвзглядами, первичные источники с личными историями.</p>
+    </div>
+    <div class="stat-row" style="margin-top: 2rem;">
+        <div class="stat-item">
+            <div class="stat-number">74</div>
+            <div class="stat-label">года истории</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">286</div>
+            <div class="stat-label">млн жизней</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">∞</div>
+            <div class="stat-label">вопросов для размышления</div>
+        </div>
+    </div>
+</div>
+
+<!-- СЛАЙД 9: Спасибо -->
+<div class="slide slide-bg-dark" data-slide="8">
+    <div class="icon-large">📖</div>
+    <h1>Спасибо за внимание!</h1>
+    <div style="background: rgba(255,255,255,0.05); padding: 1.5rem 2rem; border-radius: 12px; max-width: 600px;">
+        <p style="color: rgba(255,255,255,0.7); font-size: 0.95rem; line-height: 1.7; text-align: center;">
+            <strong>Проект:</strong> «Советская повседневность» (1917–1991)<br>
+            <strong>Формат:</strong> интерактивный HTML-сайт<br>
+            <strong>Источники:</strong> первичные документы, историография, фотографии из открытых источников<br>
+            <strong>Интерактив:</strong> викторина, галерея, раскрывающиеся блоки
+        </p>
+    </div>
+</div>
+
+<div class="nav-controls">
+    <button class="nav-btn" onclick="prevSlide()">◀ Назад</button>
+    <span class="slide-counter"><span id="current">1</span> / <span id="total">9</span></span>
+    <button class="nav-btn" onclick="nextSlide()">Вперёд ▶</button>
+</div>
+
+<script>
+let currentSlide = 0;
+const slides = document.querySelectorAll('.slide');
+const totalSlides = slides.length;
+
+
+function showSlide(n) {
+    slides.forEach(s => s.classList.remove('active'));
+    slides[n].classList.add('active');
+    document.getElementById('current').textContent = n + 1;
+    document.getElementById('progress-bar').style.width = ((n + 1) / totalSlides * 100) + '%';
+}
+
+function nextSlide() {
+    if (currentSlide < totalSlides - 1) {
+        currentSlide++;
+        showSlide(currentSlide);
+    }
+}
+
+function prevSlide() {
+    if (currentSlide > 0) {
+        currentSlide--;
+        showSlide(currentSlide);
+    }
+}
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === ' ') nextSlide();
+    if (e.key === 'ArrowLeft') prevSlide();
+});
+
+
+document.getElementById('total').textContent = totalSlides;
+showSlide(0);
+
+</script>
+
+</body>
+</html>
