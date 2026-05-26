@@ -1,0 +1,1556 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Советская повседневность — интерактивный проект</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=PT+Sans:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --soviet-red: #CC0000;
+            --soviet-dark-red: #8B0000;
+            --soviet-gold: #FFD700;
+            --soviet-cream: #F5F0E6;
+            --soviet-dark: #1a1a1a;
+            --soviet-gray: #3a3a3a;
+            --soviet-paper: #FAF8F3;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'PT Sans', sans-serif;
+            background: var(--soviet-paper);
+            color: var(--soviet-dark);
+            overflow-x: hidden;
+        }
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="none" stroke="%23CC0000" stroke-width="0.5" opacity="0.1"/><circle cx="50" cy="50" r="35" fill="none" stroke="%23FFD700" stroke-width="0.3" opacity="0.15"/><circle cx="50" cy="50" r="25" fill="none" stroke="%23CC0000" stroke-width="0.3" opacity="0.1"/></svg>');
+            background-size: 200px;
+            opacity: 0.3;
+            animation: rotate 60s linear infinite;
+        }
+        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .hero-content { position: relative; z-index: 2; padding: 2rem; }
+        .hero h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2.5rem, 6vw, 5rem);
+            font-weight: 900;
+            color: var(--soviet-gold);
+            text-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            margin-bottom: 0.5rem;
+            letter-spacing: 2px;
+        }
+        .hero .subtitle {
+            font-size: clamp(1rem, 2.5vw, 1.5rem);
+            color: rgba(255,255,255,0.85);
+            margin-bottom: 2rem;
+            font-weight: 400;
+        }
+        .hero .year-range {
+            display: inline-block;
+            padding: 0.5rem 2rem;
+            border: 2px solid var(--soviet-gold);
+            color: var(--soviet-gold);
+            font-size: 1.2rem;
+            letter-spacing: 4px;
+            margin-bottom: 2rem;
+        }
+        .scroll-indicator {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: var(--soviet-gold);
+            font-size: 2rem;
+            animation: bounce 2s infinite;
+            cursor: pointer;
+        }
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateX(-50%) translateY(0); }
+            40% { transform: translateX(-50%) translateY(-15px); }
+            60% { transform: translateX(-50%) translateY(-8px); }
+        }
+        .nav-bar {
+            position: sticky;
+            top: 0;
+            background: var(--soviet-dark);
+            z-index: 100;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.3);
+        }
+        .nav-bar ul {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            list-style: none;
+            padding: 0;
+        }
+        .nav-bar a {
+            display: block;
+            padding: 1rem 1.2rem;
+            color: #fff;
+            text-decoration: none;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+        .nav-bar a:hover, .nav-bar a.active {
+            color: var(--soviet-gold);
+            border-bottom-color: var(--soviet-red);
+            background: rgba(204,0,0,0.1);
+        }
+        .section {
+            padding: 4rem 1rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .section-title {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 700;
+            color: var(--soviet-dark-red);
+            text-align: center;
+            margin-bottom: 0.5rem;
+        }
+        .section-title::after {
+            content: '';
+            display: block;
+            width: 80px;
+            height: 4px;
+            background: var(--soviet-red);
+            margin: 1rem auto;
+        }
+        .section-desc {
+            text-align: center;
+            color: var(--soviet-gray);
+            font-size: 1.1rem;
+            max-width: 750px;
+            margin: 0 auto 3rem;
+            line-height: 1.7;
+        }
+        .timeline { position: relative; padding: 2rem 0; }
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: var(--soviet-red);
+            transform: translateX(-50%);
+        }
+        .timeline-item {
+            position: relative;
+            width: 50%;
+            padding: 1.5rem 2rem;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease;
+        }
+        .timeline-item.visible { opacity: 1; transform: translateY(0); }
+        .timeline-item:nth-child(odd) { left: 0; text-align: right; padding-right: 3rem; }
+        .timeline-item:nth-child(even) { left: 50%; padding-left: 3rem; }
+        .timeline-dot {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: var(--soviet-gold);
+            border: 4px solid var(--soviet-red);
+            border-radius: 50%;
+            top: 2rem;
+        }
+        .timeline-item:nth-child(odd) .timeline-dot { right: -10px; }
+        .timeline-item:nth-child(even) .timeline-dot { left: -10px; }
+        .timeline-year {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--soviet-red);
+        }
+        .timeline-title { font-size: 1.1rem; font-weight: 700; margin: 0.3rem 0; color: var(--soviet-dark); }
+        .timeline-text { color: var(--soviet-gray); line-height: 1.7; font-size: 0.95rem; }
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        .card {
+            background: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+        }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 8px 30px rgba(0,0,0,0.15); }
+        .card-image { width: 100%; height: 220px; object-fit: cover; display: block; }
+        .card-body { padding: 1.5rem; }
+        .card-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.3rem;
+            color: var(--soviet-dark-red);
+            margin-bottom: 0.5rem;
+        }
+        .card-text { color: var(--soviet-gray); line-height: 1.7; font-size: 0.95rem; }
+        .expandable-card {
+            background: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 1.5rem;
+            transition: all 0.3s;
+        }
+        .expandable-card:hover { box-shadow: 0 6px 25px rgba(0,0,0,0.12); }
+        .expandable-header {
+            padding: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(135deg, #fff 0%, #faf8f3 100%);
+            border-left: 4px solid var(--soviet-red);
+        }
+        .expandable-header h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2rem;
+            color: var(--soviet-dark-red);
+        }
+        .expandable-toggle {
+            font-size: 1.5rem;
+            color: var(--soviet-red);
+            transition: transform 0.3s;
+        }
+        .expandable-card.open .expandable-toggle { transform: rotate(180deg); }
+        .expandable-body {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease;
+            padding: 0 1.5rem;
+        }
+        .expandable-card.open .expandable-body {
+            max-height: 2000px;
+            padding: 0 1.5rem 1.5rem;
+        }
+        .expandable-body p, .expandable-body ul {
+            color: var(--soviet-gray);
+            line-height: 1.8;
+            margin-bottom: 1rem;
+        }
+        .expandable-body ul { padding-left: 1.5rem; }
+        .expandable-body li { margin-bottom: 0.5rem; }
+        .info-block {
+            background: #fff;
+            border-left: 4px solid var(--soviet-red);
+            padding: 1.5rem;
+            margin: 2rem 0;
+            border-radius: 0 8px 8px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .info-block h4 {
+            color: var(--soviet-dark-red);
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+            font-family: 'Playfair Display', serif;
+        }
+        .info-block p { color: var(--soviet-gray); line-height: 1.7; }
+        .quiz-container {
+            background: #fff;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            max-width: 750px;
+            margin: 2rem auto;
+        }
+        .quiz-progress {
+            text-align: center;
+            margin-bottom: 1rem;
+            color: var(--soviet-gray);
+            font-size: 0.9rem;
+        }
+        .quiz-question {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: var(--soviet-dark);
+        }
+        .quiz-options { display: flex; flex-direction: column; gap: 0.8rem; }
+        .quiz-option {
+            padding: 1rem 1.5rem;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1rem;
+            background: #fff;
+            text-align: left;
+        }
+        .quiz-option:hover { border-color: var(--soviet-red); background: rgba(204,0,0,0.05); }
+        .quiz-option.correct { border-color: #2ecc71; background: rgba(46,204,113,0.1); color: #27ae60; }
+        .quiz-option.wrong { border-color: #e74c3c; background: rgba(231,76,60,0.1); color: #c0392b; }
+        .quiz-option.disabled { pointer-events: none; opacity: 0.7; }
+        .quiz-feedback {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 8px;
+            font-weight: 700;
+            display: none;
+        }
+        .quiz-feedback.show { display: block; }
+        .quiz-feedback.correct-fb { background: rgba(46,204,113,0.15); color: #27ae60; }
+        .quiz-feedback.wrong-fb { background: rgba(231,76,60,0.15); color: #c0392b; }
+        .quiz-nav {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 1.5rem;
+        }
+        .btn {
+            padding: 0.8rem 2rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 700;
+            transition: all 0.3s;
+        }
+        .btn-primary { background: var(--soviet-red); color: #fff; }
+        .btn-primary:hover { background: var(--soviet-dark-red); }
+        .btn-secondary { background: #ddd; color: var(--soviet-dark); }
+        .btn-secondary:hover { background: #ccc; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .quiz-score {
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--soviet-dark-red);
+            margin: 2rem 0;
+        }
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        .gallery-item {
+            position: relative;
+            overflow: hidden;
+            border-radius: 8px;
+            cursor: pointer;
+            aspect-ratio: 4/3;
+        }
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s;
+        }
+        .gallery-item:hover img { transform: scale(1.1); }
+        .gallery-caption {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(0,0,0,0.85));
+            color: #fff;
+            padding: 2rem 1rem 1rem;
+            font-size: 0.9rem;
+            transform: translateY(100%);
+            transition: transform 0.3s;
+        }
+        .gallery-item:hover .gallery-caption { transform: translateY(0); }
+        .lightbox {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.92);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        .lightbox.active { display: flex; }
+        .lightbox img { max-width: 90%; max-height: 78%; border-radius: 8px; }
+        .lightbox-close {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            color: #fff;
+            font-size: 3rem;
+            cursor: pointer;
+            z-index: 1001;
+        }
+        .lightbox-caption {
+            color: #fff;
+            margin-top: 1rem;
+            font-size: 1.1rem;
+            text-align: center;
+            max-width: 80%;
+        }
+        footer {
+            background: var(--soviet-dark);
+            color: #fff;
+            text-align: center;
+            padding: 3rem 1rem;
+            margin-top: 4rem;
+        }
+        footer h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            color: var(--soviet-gold);
+            margin-bottom: 1rem;
+        }
+        footer p {
+            color: rgba(255,255,255,0.7);
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.7;
+        }
+        @media (max-width: 768px) {
+            .timeline::before { left: 20px; }
+            .timeline-item { width: 100%; left: 0 !important; padding-left: 3rem !important; padding-right: 1rem !important; text-align: left !important; }
+            .timeline-dot { left: 10px !important; right: auto !important; }
+            .nav-bar a { padding: 0.8rem 0.8rem; font-size: 0.7rem; }
+        }
+        .fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease;
+        }
+        .fade-in.visible { opacity: 1; transform: translateY(0); }
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            align-items: start;
+        }
+        @media (max-width: 768px) { .two-col { grid-template-columns: 1fr; } }
+        .quote-block {
+            background: var(--soviet-dark);
+            color: var(--soviet-gold);
+            padding: 2rem;
+            border-radius: 8px;
+            font-style: italic;
+            font-size: 1.1rem;
+            text-align: center;
+            margin: 2rem 0;
+            position: relative;
+        }
+        .quote-block::before {
+            content: '"';
+            font-size: 4rem;
+            position: absolute;
+            top: -10px;
+            left: 20px;
+            opacity: 0.3;
+        }
+        .quote-author {
+            margin-top: 1rem;
+            font-style: normal;
+            font-size: 0.9rem;
+            color: rgba(255,215,0,0.7);
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+        .stat-item {
+            background: #fff;
+            padding: 1.5rem;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            border-top: 3px solid var(--soviet-red);
+        }
+        .stat-number {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            color: var(--soviet-red);
+            font-weight: 700;
+        }
+        .stat-label {
+            color: var(--soviet-gray);
+            font-size: 0.9rem;
+            margin-top: 0.3rem;
+        }
+        </style>
+</head>
+<body>
+
+    <section class="hero" id="top">
+        <div class="hero-content">
+            <div class="year-range">1917 — 1991</div>
+            <h1>Советская повседневность</h1>
+            <p class="subtitle">Исследование жизни в Советском Союзе: быт, культура, идеология и люди</p>
+        </div>
+        <div class="scroll-indicator" onclick="document.getElementById('nav').scrollIntoView({behavior:'smooth'})">▼</div>
+    </section>
+
+    <nav class="nav-bar" id="nav">
+        <ul>
+            <li><a href="#timeline" class="nav-link">Этапы</a></li>
+            <li><a href="#byt" class="nav-link">Быт</a></li>
+            <li><a href="#trud" class="nav-link">Труд и отдых</a></li>
+            <li><a href="#obrazovanie" class="nav-link">Образование</a></li>
+            <li><a href="#zdravoohranenie" class="nav-link">Здравоохранение</a></li>
+            <li><a href="#social" class="nav-link">Социум</a></li>
+            <li><a href="#ideologia" class="nav-link">Идеология</a></li>
+            <li><a href="#anomalii" class="nav-link">Аномалии</a></li>
+            <li><a href="#gallery" class="nav-link">Галерея</a></li>
+            <li><a href="#tasks" class="nav-link">Задания</a></li>
+        </ul>
+    </nav>
+
+    <section class="section" id="timeline">
+        <h2 class="section-title">Хронология советской эпохи</h2>
+        <p class="section-desc">Ключевые периоды развития советского общества от революции до распада СССР. Каждый этап оставил неизгладимый след в повседневной жизни миллионов людей.</p>
+
+        <div class="stats-grid">
+            <div class="stat-item">
+                <div class="stat-number">74</div>
+                <div class="stat-label">года существования СССР</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">15</div>
+                <div class="stat-label">союзных республик</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">286</div>
+                <div class="stat-label">млн население (1989)</div>
+            </div>
+        </div>
+
+        <div class="timeline">
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="timeline-year">1917 — 1924</div>
+                <div class="timeline-title">Гражданская война и военный коммунизм</div>
+                <div class="timeline-text">Октябрьская революция свергла Временное правительство. Началась Гражданская война, продразвёрстка, национализация промышленности. Формировались основы нового государства. Голод 1921–1922 годов унёс жизни около 5 миллионов человек. В 1922 году образован СССР. Введена система продовольственных карточек — инструмент политического принуждения и контроля.</div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="timeline-year">1924 — 1953</div>
+                <div class="timeline-title">Сталинская эпоха</div>
+                <div class="timeline-text">Индустриализация за счёт коллективизации сельского хозяйства. Голодомор 1932–1933 годов. Массовые репрессии 1937–1938. Великая Отечественная война (1941–1945) унесла около 27 млн жизней. Послевоенное восстановление, атомный проект, холодная война. Формирование «большого стиля» — тоталитарной повседневности с жёсткой системой предписаний и запретов.</div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="timeline-year">1953 — 1964</div>
+                <div class="timeline-title">Оттепель</div>
+                <div class="timeline-text">После смерти Сталина началась десталинизация. XX съезд КПСС (1956) и разоблачение культа личности. Амнистия политзаключённых. Массовое жилищное строительство — «хрущёвки». Первый полёт человека в космос (1961). Кубинский ракетный кризис (1962). Деструкция «большого стиля», появление новых норм потребления.</div>
+<div class="info-block" style="border-left-color: #2b6cb0; background: #ebf8ff;">
+    <h4>📜 Первичный источник</h4><h4>(адаптированный парафраз)</h4>
+    <p style="font-style: italic; margin-bottom: 0.8rem;">
+        «Культ личности Сталина достиг таких размеров, что Сталин начал наделять себя 
+        качествами бога... Это было грубейшим нарушением внутрипартийной демократии, 
+        принципов коллективного руководства»
+    </p>
+    <p style="font-size: 0.9rem; color: #666; margin-bottom: 0;">
+        <strong>Н.С. Хрущёв</strong>, доклад «О культе личности и его последствиях», 
+        закрытое заседание XX съезда КПСС, 25 февраля 1956 г. — документ, 
+        положивший начало десталинизации и изменивший повседневную жизнь 
+        (амнистия, прекращение массового террора, новые нормы потребления).
+    </p>
+</div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="timeline-year">1964 — 1985</div>
+                <div class="timeline-title">Эпоха застоя</div>
+                <div class="timeline-text">Стабильность при Брежневе сменилась застоем. Развитие потребительского общества, но рост дефицита. Космическая программа, Олимпиада-80, Афганская война (1979–1989). «Развитой социализм» — официальная идеология. Умеренный рост благосостояния при нарастающих экономических проблемах.</div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="timeline-year">1985 — 1991</div>
+                <div class="timeline-title">Перестройка и распад</div>
+                <div class="timeline-text">Приход Горбачёва. Гласность, перестройка, ускорение. Появление кооперативов, первые выборы с альтернативными кандидатами. Экономический кризис, дефицит, очереди. Путч 1991 года. Беловежское соглашение. 26 декабря 1991 года СССР официально прекратил существование.</div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="byt">
+        <h2 class="section-title">Быт и материальная культура</h2>
+        <p class="section-desc">Как жили советские люди: жилищные условия, потребление, домашний уют и материальная культура, формировавшаяся под влиянием идеологии и экономики</p>
+
+        <div class="cards-grid">
+            <div class="card">
+                <img src="https://rodina-history.ru/uploads/images/185/09/52/TASS_368774.jpg" alt="Советская квартира" class="card-image">
+                <div class="card-body">
+                    <h3 class="card-title">Коммунальные квартиры</h3>
+                    <p class="card-text">До 1960-х годов большинство городских жителей жили в коммуналках — квартирах, где несколько семей делили кухню, ванную и туалет. Исследования показывают, что практически вся жизнь человека проходила на виду у соседей. Это создавало особую атмосферу соседских отношений: совместные праздники, ссоры из-за очереди в ванную, общие телефоны на лестничной клетке. Система распределения жилья стала важным рычагом влияния государства на сознание и поведение горожанина.</p>
+                </div>
+            </div>
+            <div class="card">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/1/1b/%D0%A2%D0%B5%D0%BB%D0%B5%D0%B2%D0%B8%D0%B7%D0%BE%D1%80_%D0%A0%D0%B5%D0%BA%D0%BE%D1%80%D0%B4_%D0%91.jpg" alt="Советская квартира с телевизором" class="card-image">
+                <div class="card-body">
+                    <h3 class="card-title">«Хрущёвки» и бытовая техника</h3>
+                    <p class="card-text">В эпоху оттепели началось массовое строительство отдельных квартир. В каждой семье мечтали о телевизоре «Рекорд», холодильнике «ЗИЛ» и пылесосе «Ракета». Мебель покупалась наборами: «Стенка», «Татьяна», «Наташа» — стандартные гарнитуры, которые стояли в миллионах квартир. Квартира-студия 30–40 м² казалась раем после коммуналки, хотя качество было соответствующим: тонкие стены, низкие потолки, плохая звукоизоляция.</p>
+                </div>
+            </div>
+            <div class="card">
+                <img src="https://kimi-web-img.moonshot.cn/img/www.qminder.com/7fe06716a6fc4d6f6742bc4b60e73fad587cb25f.png" alt="Очередь в СССР" class="card-image">
+                <div class="card-body">
+                    <h3 class="card-title">Дефицит и очереди</h3>
+                    <p class="card-text">«Если видишь очередь — вставай, не спрашивая, что продают». Дефицит товаров стал неотъемлемой частью советской жизни. Талонная система, спекуляция, «блат» — всё это формировало особую экономику повседневности. По свидетельствам очевидцев, система распределения всего и вся очень быстро привела к выстраиванию иерархического общества, в котором мерилом значимости индивида стала его приближенность или удаленность от «кормушки».</p>
+                </div>
+            </div>
+            <div class="card">
+                <img src="https://kimi-web-img.moonshot.cn/img/npr.brightspotcdn.com/5f81e3bc7af5b02d85264a8d523092a71f54cfea" alt="Советская дача" class="card-image">
+                <div class="card-body">
+                    <h3 class="card-title">Дачная жизнь</h3>
+                    <p class="card-text">Дача была не просто местом отдыха, а важной частью выживания. Огороды, картошка, огурцы — многие семьи обеспечивали себя продуктами благодаря дачным участкам. Летние выходные проводились на шести сотках: посадки, прополка, сбор урожая. Дача стала символом советского образа жизни.</p>
+                </div>
+            </div>
+            <div class="card">
+                <img src="https://citytraffic.ru/wp-content/uploads/2024/04/06-4.jpg" alt="Советская кухня" class="card-image">
+                <div class="card-body">
+                    <h3 class="card-title">Советская кухня</h3>
+                    <p class="card-text">Кухня была центром семейной жизни. Газовая плита «Гефест», электрический чайник, набор посуды «Красный фарфор». На стене — ковёр (иногда и на стене, и на полу), на полке — горка с хрусталём. Готовили просто, но сытно: щи, котлеты, макароны по-флотски, компот. В 1920-е годы появились общественные столовые, работавшие по карточкам — первый шаг к системе нормирования питания.</p>
+                </div>
+            </div>
+            <div class="card">
+                <img src="https://kimi-web-img.moonshot.cn/img/mf.b37mrtl.ru/bccc24035d4fd8ec7bcc5aea548968b6b99697ea.jpg" alt="Советский телевизор" class="card-image">
+                <div class="card-body">
+                    <h3 class="card-title">Телевидение — окно в мир</h3>
+                    <p class="card-text">Телевизор «Рубин», «Рекорд» или «Берёзка» стоял в почётном месте. Программа «Время» в 21:00 собирала всю страну у экранов. Мультфильмы по воскресеньям, футбольные трансляции, «Спокойной ночи, малыши!» — телевидение формировало единое культурное пространство на 11 часовых поясах.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="expandable-card" onclick="this.classList.toggle('open')">
+            <div class="expandable-header">
+                <h3>🏠 Жилищный вопрос — вечная проблема</h3>
+                <span class="expandable-toggle">▼</span>
+            </div>
+            <div class="expandable-body">
+                <p>«Квартирный вопрос испортил семейную жизнь» — эта фраза из пьесы Горького стала пророческой для советского общества. До 1950-х годов жилищный фонд был катастрофически недостаточным. После войны ситуация усугубилась: разрушенные города, возвращающиеся солдаты, демографический взрыв.</p>
+                <p><strong>Коммунальные квартиры</strong> — это не выбор, а необходимость. В одной квартире могли жить 3–5 семей, каждая в своей комнате. Общая кухня превращалась в арену конфликтов: чьё мясо варится, кто забыл вымыть посуду, почему чужие гости сидят за столом. По архивным данным, рождение и распад первых коммун (в основном на примере Петрограда-Ленинграда) привели к возникновению феномена коммунальной квартиры, где практически вся жизнь человека проходила на виду у соседей.</p>
+                <p><strong>«Хрущёвки»</strong> (пятиэтажные панельные дома) стали спасением. Строились быстро, дёшево, серийно. Квартира-студия 30–40 м² казалась раем после коммуналки. Но качество было соответствующим: тонкие стены, низкие потолки, плохая звукоизоляция.</p>
+                <ul>
+                    <li><strong>Кооперативное жильё</strong> — возможность получить квартиру быстрее, но за собственные деньги</li>
+                    <li><strong>Очередь на жильё</strong> — регистрировалась на работе, ждали 10–15 лет</li>
+                    <li><strong>Обмен квартир</strong> — сложные сделки с участием нескольких семей</li>
+                    <li><strong>«Блат»</strong> — неформальные связи для получения жилья вне очереди</li>
+                    <li><strong>Награждение жильём</strong> — система поощрения за трудовые и общественные заслуги</li>
+                </ul>
+            </div>
+        </div>
+<div class="info-block" style="border-left-color: #c53030; background: #fff5f5;">
+    <h4>⚖️ Контрвзгляд: жильё как орудие принуждения</h4>
+    <p>Историки жилищной политики (Горский, Лебина) показывают, что система распределения жилья была не социальной гарантией, а механизмом управления:</p>
+    <ul style="padding-left: 1.5rem; margin-top: 0.5rem;">
+        <li><strong>«Квартирный вопрос» как политический рычаг</strong> — угроза выселения или отказ в очереди использовались для наказания инакомыслящих</li>
+        <li><strong>Коммуналка как паноптикум</strong> — тотальный контроль соседей заменял функции полиции; доносы из коммуналок — массовое явление</li>
+        <li><strong>«Хрущёвки» — не радость, а новая норма контроля</strong> — отдельная квартира облегчила надзор за семьей (без «защиты» соседей), но дала иллюзию приватности</li>
+        <li><strong>Кооперативы — иерархия доступа</strong> — требовали больших сумм, фактически закрываясь для рабочих</li>
+    </ul>
+    <p style="font-size: 0.85rem; color: #666; margin-top: 0.8rem;">
+        <em>См.: Горский А.А.;
+        Лебина Н.Б. Советская повседневность. СПб., 2015.</em>
+    </p>
+</div>
+        <div class="expandable-card" onclick="this.classList.toggle('open')">
+            <div class="expandable-header">
+                <h3>🛒 Экономика дефицита</h3>
+                <span class="expandable-toggle">▼</span>
+            </div>
+            <div class="expandable-body">
+<div class="info-block" style="border-left-color: var(--soviet-dark-red); background: #fff8f0;">
+    <h4>📜 Первичный источник</h4>
+    <p style="font-style: italic; margin-bottom: 0.8rem;">
+        «Хлебная монополия, хлебная карточка... являются в руках пролетарского государства, 
+        в руках полновластных Советов, самым могучим средством учёта и контроля... 
+        Это средство контроля и принуждения к труду посильнее законов Конвента и его гильотины»
+    </p>
+    <p style="font-size: 0.9rem; color: #666; margin-bottom: 0;">
+        <strong>В.И. Ленин</strong>, «Очередные задачи Советской власти», 
+        <em>Правда</em>, 28 апреля 1918 г. — статья обосновывала введение продовольственной монополии 
+        как инструмент классовой борьбы и принуждения к труду.
+    </p>
+</div>
+                <p>Советская экономика планировалась сверху. Госплан определял, сколько и чего произвести. Но планы часто не выполнялись, а приоритет отдавался тяжёлой промышленности и оборонке. В результате — хронический дефицит потребительских товаров.</p>
+                <p><strong>Талонная система</strong> действовала периодически: в военное время, во время засухи, в период перестройки. Талоны давали право купить определённое количество сахара, масла, мяса. Без талона — ничего. По свидетельствам очевидцев, Ленин ещё в октябре 1917 года отмечал: «Хлебная монополия, хлебная карточка... являются в руках пролетарского государства, в руках полновластных Советов, самым могучим средством учёта и контроля... Это средство контроля и принуждения к труду посильнее законов конвента и его гильотины».</p>
+                <p><strong>«Блат»</strong> — система неформальных связей, позволявших получить дефицитные товары. Знакомый на заводе, родственник в торговле, сосед на складе — каждый контакт был на вес золота. «Блат» был незаконным, но повсеместным.</p>
+                <ul>
+                    <li><strong>Спекуляция</strong> — покупка товаров по госценам и перепродажа по рыночным. Наказывалась уголовно.</li>
+                    <li><strong>«Фарцовщики»</strong> — люди, менявшие иностранную валюту и товары на рубли</li>
+                    <li><strong>«Челноки»</strong> — в перестройку — люди, возившие товары из-за границы</li>
+                    <li><strong>«Закупы»</strong> — поездки в другие города за дефицитом</li>
+                </ul>
+<div class="info-block" style="border-left-color: #38a169; background: #f0fff4;">
+    <h4>📜 Первичный источник</h4>
+    <p style="font-style: italic; margin-bottom: 0.8rem;">
+        «В целях развития товарного производства и расширения рынка товаров народного потребления... 
+        разрешить гражданам создавать кооперативы для производства потребительских товаров, 
+        выполнения работ и оказания платных услуг»
+    </p>
+    <p style="font-size: 0.9rem; color: #666; margin-bottom: 0;">
+        <strong>Указ Президиума Верховного Совета СССР</strong> от 8 мая 1988 г. 
+        «О кооперации в СССР» — юридическое признание частного предпринимательства, 
+        фактически легализовавшее рынок в социалистической экономике и изменившее 
+        повседневность (первые кооперативные кафе, ремонтные мастерские, «челноки»).
+    </p>
+</div>
+            </div>
+        </div>
+
+        <div class="info-block">
+            <h4>💡 Интересный факт</h4>
+            <p>В СССР существовала система распределения дефицитных товаров через списки и «блат». Например, чтобы купить автомобиль «Жигули», нужно было отстоять в очереди несколько лет, либо иметь «входы» на заводе. При этом цена автомобиля была доступной — около 5000 рублей (примерно 2–3 годовые зарплаты инженера), но купить его было почти невозможно без связей.</p>
+        </div>
+
+        </section>
+
+    <section class="section" id="trud">
+        <h2 class="section-title">Труд и отдых</h2>
+        <p class="section-desc">Рабочие будни, досуг, пионерские лагеря, санатории и особенности советского отдыха</p>
+
+        <div class="cards-grid">
+            <div class="card">
+                <img src="https://kimi-web-img.moonshot.cn/img/pictures.abebooks.com/b1118008d98a02c4011c68f3df242a81215e8f9f.jpg" alt="Советский рабочий" class="card-image">
+                <div class="card-body">
+                    <h3 class="card-title">Трудовые коллективы</h3>
+                    <p class="card-text">Работа была не просто источником дохода, но и центром социальной жизни. Трудовые коллективы организовывали субботники, спортивные соревнования, праздники. Движение за коммунистический труд стимулировало трудовую мотивацию. На заводах существовали столовые, детские сады, поликлиники, библиотеки.</p>
+                </div>
+            </div>
+            <div class="card">
+                <img src="https://kimi-web-img.moonshot.cn/img/mf.b37mrtl.ru/3196495139a01b7bdcdd2d0776f99007244d0c02.jpg" alt="Москвич" class="card-image">
+                <div class="card-body">
+                    <h3 class="card-title">Автомобильная мечта</h3>
+                    <p class="card-text">Личный автомобиль был предметом гордости. «Москвич», «Жигули», «Волга» — эти марки стали символами советского автопрома. Машина давала свободу передвижения и статус в обществе. Вождение считалось мужским делом, а ремонт автомобиля — обязанностью каждого советского мужчины.</p>
+                </div>
+            </div>
+            <div class="card">
+                <img src="https://cs12.pikabu.ru/post_img/big/2021/09/18/7/1631965063126859211.jpg" alt="Советская столовая" class="card-image">
+                <div class="card-body">
+                    <h3 class="card-title">Столовые и общепит</h3>
+                    <p class="card-text">Столовая при заводе или институте — это не роскошь, а необходимость. Обед из трёх блюд стоил 60–80 копеек. Меню стандартное: щи или борщ, котлета с пюре или макаронами, компот. Кафе и рестораны были редкостью, туда ходили по праздникам или с иностранными гостями.</p>
+                </div>
+            </div>
+            <div class="card">
+                <img src="https://cs14.pikabu.ru/post_img/big/2023/12/31/4/170400230312436412.jpg" alt="Еда в столовой" class="card-image">
+                <div class="card-body">
+                    <h3 class="card-title">Советская кухня</h3>
+                    <p class="card-text">Домашняя еда — основа питания. Продукты покупались на рынке или в магазине. Колбаса «Докторская», сыр «Российский», масло сливочное — дефицитные продукты, за которыми выстраивались очереди. На праздник — «селёдка под шубой», «оливье», красная икра (если повезло).</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="expandable-card" onclick="this.classList.toggle('open')">
+            <div class="expandable-header">
+                <h3>🏖️ Санатории, пионерские лагеря и отдых</h3>
+                <span class="expandable-toggle">▼</span>
+            </div>
+            <div class="expandable-body">
+                <p>Советский человек имел право на отдых, закреплённое Конституцией. Отпуск составлял минимум 15 рабочих дней (позже — 24). Но куда поехать?</p>
+                <p><strong>Санатории</strong> — профилактории для восстановления здоровья. Путёвки выдавали через профсоюз или по направлению врача. Крым, Кавказ, Карелия — популярные направления. Лечение, диета, физпроцедуры, прогулки — стандартная программа.</p>
+                <p><strong>Пионерские лагеря</strong> — летний отдых для детей. «Артек» — элитный, «Орлёнок» — тоже престижный. Обычные лагеря — в лесу, у реки, с палатками или в деревянных домиках. Подъём под барабанную дробь, зарядка, линейка, костёр, песни у костра — типичный день пионера.</p>
+                <p><strong>Дома отдыха</strong> — для тех, кто не болел. Дешевле санатория, но без лечения. Часто располагались в живописных местах — на берегу озера, в сосновом бору.</p>
+                <ul>
+                    <li><strong>Туристические походы</strong> — популярный вид отдыха молодёжи</li>
+                    <li><strong>Дачный сезон</strong> — выходные на шести сотках</li>
+                    <li><strong>Культпоходы</strong> — в театр, кино, музей</li>
+                    <li><strong>Спортивные секции</strong> — футбол, хоккей, гимнастика, шахматы</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="quote-block">
+            Труд в СССР есть дело чести, славы, доблести и геройства 
+            <div class="quote-author">— советский лозунг, образованный из политического отчёта Центрального Комитета XVI съезду ВКП(б), представленного И. В. Сталиным 27 июня 1930 года.</div>
+        </div>
+    </section>
+
+    <section class="section" id="obrazovanie">
+        <h2 class="section-title">Образование и воспитание</h2>
+        <p class="section-desc">Школа, пионеры, комсомол и подготовка «нового советского человека» — система, которая охватывала всю жизнь от яслей до аспирантуры</p>
+
+        <div class="cards-grid">
+            <div class="card">
+                <img src="https://kimi-web-img.moonshot.cn/img/galinabulakh.wordpress.com/205fa0c445e904e21e54d8c6fa023724207ca9bd.jpg" alt="Советский класс" class="card-image">
+                <div class="card-body">
+                    <h3 class="card-title">Советская школа</h3>
+                    <p class="card-text">Единая система образования, бесплатное обучение, обязательная десятилетка. На стенах — портреты Ленина, в программе — трудовое обучение, начальная военная подготовка. Школа воспитывала коллективизм и патриотизм. Дисциплина была строгой, оценки — открытыми для всех.</p>
+                </div>
+            </div>
+            <div class="card">
+                <img src="https://icdn.lenta.ru/images/2022/05/19/14/20220519141309473/pic_1175302f977eb78c6de0fb2648fcd8e8.jpg" alt="Школьная доска" class="card-image">
+                <div class="card-body">
+                    <h3 class="card-title">Пионерская организация</h3>
+                    <p class="card-text">Каждый школьник мечтал стать пионером. Красный галстук, торжественный обряд посвящения, пионерские сборы и походы — всё это формировало идеологическую лояльность с раннего возраста. Девиз: «Пионер — друг детям, пионер — друг пионерам, пионер — друг комсомольцам».</p>
+                </div>
+            </div>
+            <div class="card">
+                <img src="https://www.eg.ru/wp-content/uploads/2022/09/yasli074654.jpg" alt="Советский детский сад" class="card-image">
+                <div class="card-body">
+                    <h3 class="card-title">Детские сады и ясли</h3>
+                    <p class="card-text">Государство заботилось о детях с раннего возраста. Ясли принимали детей с 2 месяцев, детские сады — с 3 лет. Родители могли работать, не беспокоясь о детях. В садике — режим дня, занятия, прогулки, дневной сон, трёхразовое питание. Воспитатели были авторитетом, почти как родители.</p>
+                </div>
+            </div>
+            <div class="card">
+                <img src="https://static.tildacdn.com/tild6363-3634-4366-b237-373736616635/719b16ab-61f3-5f88-8.jpg" alt="Советское кино" class="card-image">
+                <div class="card-body">
+                    <h3 class="card-title">Кино и культурное воспитание</h3>
+                    <p class="card-text">Кино было важнейшим воспитательным инструментом. Школьники ходили на «неделю детского фильма», смотрели «Иваново детство», «Добро пожаловать, или Посторонним вход воспрещён», «Приключения Электроника». Каждый фильм нёс мораль: дружба, честность, патриотизм.</p>
+                </div>
+            </div>
+        </div>
+<div class="info-block" style="border-left-color: #c53030; background: #fff5f5;">
+    <h4>📜 Первичный источник</h4>
+    <p style="font-style: italic; margin-bottom: 0.8rem;">
+        «Пионер — это друг детям, друг пионерам, друг комсомольцам и друг рабочим и крестьянам. 
+        Пионер готовит себя стать коммунистом. Пионер носит красный галстук — 
+        знак того, что он связан с борьбой рабочих всех стран за новый, лучший мир»
+    </p>
+    <p style="font-size: 0.9rem; color: #666; margin-bottom: 0;">
+        <strong>Инструкция Всероссийской пионерской организации</strong>, утверждена 
+        19 мая 1922 г. II Всероссийской конференцией рабочей и крестьянской молодёжи — 
+        программный документ, определивший структуру, символику и идеологическую 
+        направленность пионерского движения на десятилетия.
+    </p>
+</div>
+        <div class="expandable-card" onclick="this.classList.toggle('open')">
+            <div class="expandable-header">
+                <h3>📚 Система образования: от яслей до аспирантуры</h3>
+                <span class="expandable-toggle">▼</span>
+            </div>
+            <div class="expandable-body">
+                <p>Советская система образования считалась одной из лучших в мире. Она была бесплатной, всеобщей и многоступенчатой.</p>
+                <p><strong>Дошкольное образование:</strong> ясли (с 2 мес.), детские сады (с 3 лет). Государственные, почти бесплатные. Очередь в хороший садик могла длиться годами.</p>
+                <p><strong>Школа:</strong> 10 классов (позже 11). Обязательная программа: русский язык, литература, математика, физика, химия, биология, история, обществоведение, иностранный язык, трудовое обучение, физкультура, начальная военная подготовка (для старшеклассников). Оценки — по пятибалльной системе.</p>
+                <p><strong>Специальное и высшее образование:</strong> техникумы, ПТУ, институты, университеты. Обучение бесплатное, но с конкурсом. Студенты получали стипендию (40–75 рублей) и общежитие. После окончания вуза выпускник обязан был отработать 3 года по распределению — «отработка».</p>
+                <ul>
+                    <li><strong>Физмат</strong> — физико-математические школы с углублённым изучением точных наук</li>
+                    <li><strong>Школы с углублённым изучением языков</strong> — английский, немецкий, французский</li>
+                    <li><strong>Вечерние школы</strong> — для работающей молодёжи</li>
+                    <li><strong>Заочное обучение</strong> — популярно среди работающих специалистов</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="info-block">
+            <h4>🎓 Образовательная система</h4>
+            <p>СССР достиг почти 100% грамотности населения. Были созданы вечерние школы для работающей молодёжи, заочное обучение. Высшее образование было бесплатным, но конкурс на поступление был огромным — иногда 10–15 человек на место. После окончания вуза выпускник обязан был отработать 3 года по распределению — «отработка».</p>
+        </div>
+    </section>
+
+    <section class="section" id="zdravoohranenie">
+        <h2 class="section-title">Здравоохранение и социальное обеспечение</h2>
+        <p class="section-desc"></p>
+
+        <div class="two-col">
+            <div>
+                <div class="info-block">
+                    <h4>🏥 Система Семашко</h4>
+                    <p>В результате Октябрьской революции 1917 года в России было создано новое государство с коммунистической идеологией. Одной из главных проблем стало отсутствие системы здравоохранения.</p>
+                    <p>11 июля 1918 года был создан Народный комиссариат здравоохранения во главе с Н.А. Семашко — врачом-эпидемиологом, выпускником Казанского университета. В основу системы легли принципы: централизации, равной доступности медпомощи для всех, приоритета материнства и детства, единства профилактики и лечения, ликвидации социальных причин болезней и привлечения общественности.</p>
+                    <p>Несмотря на гражданскую войну, эпидемии тифа, холеры, оспы и острую нехватку специалистов, медикаментов и больниц, система быстро развивалась. Были введены 8-часовой рабочий день, социальное страхование, бесплатная медицина. Особое внимание уделялось детству и материнству — были созданы детские поликлиники и ясли, что резко снизило детскую смертность.</p>
+                    <p>К 1927 году заболеваемость сыпным тифом снизилась в 89 раз, возвратным тифом — более чем в 100 раз. Малярия к 1930 году сократилась втрое. В 1919 году началась обязательная вакцинация от оспы, и к 1936–1937 годам болезнь была ликвидирована. Смертность от туберкулёза к началу Второй мировой войны упала с 400 до 80 на 100 000.</p>
+                    <p>Активно развивалась фармацевтика: были созданы НИИ, построены заводы в Харькове, Киеве, Хабаровске и других городах. К 1955 году в стране работало 334 тыс. врачей, 1,29 млн больничных коек, 906 тыс. мест в яслях.</p>
+                    <p>Система Семашко — бесплатная, всеобщая, бюджетная модель здравоохранения — стала образцом для Великобритании, Швеции, Италии и других стран. Её главным недостатком было хроническое недофинансирование, связанное с военными расходами. Международное совещание ВОЗ в Алма-Ате (1978) признало принципы первичной помощи в СССР одними из лучших в мире.</p>
+                </div>
+<div class="info-block" style="border-left-color: #4a5568; background: #f7fafc;">
+    <h4>⚖️ Контрвзгляд: цена «бесплатной» медицины</h4>
+    <p>Историки указывают на системные проблемы модели Семашко, которые нарастали десятилетиями:</p>
+    <ul style="padding-left: 1.5rem; margin-top: 0.5rem;">
+        <li><strong>Хроническое недофинансирование</strong> — военные расходы съедали до 25% ВВП, медицина довольствовалась остатками</li>
+        <li><strong>«Бесплатность» как миф</strong> — врачи получали зарплату ниже средней по промышленности, что вело к взяточничеству и «блату» в поликлиниках</li>
+        <li><strong>Отсутствие выбора</strong> — пациент не мог выбрать врача или клинику, прикреплялся по месту жительства</li>
+        <li><strong>Скрытие информации</strong> — данные об эпидемиях (СПИД, дифтерия в 1990-х) засекречивались</li>
+        <li><strong>Психиатрия как репрессивный инструмент</strong> — инакомыслящих лечили принудительно («вялотекущая шизофрения»)</li>
+    </ul>
+    <p style="font-size: 0.85rem; color: #666; margin-top: 0.8rem;">
+        <em>См.: Лебина Н.Б. Советская повседневность. СПб., 2015. С. 245–267.</em>
+    </p>
+</div>
+                <div class="info-block">
+                    <h4>👶 Материнство и детство</h4>
+                    <p>Успехи в охране материнства и детства в СССР остаются уникальными до сих пор.</p>
+                    <p>В дореволюционной России ситуация была катастрофической: детские отделения существовали лишь в нескольких больницах, а детская смертность до года достигала 273 случаев на 1000 новорождённых. В детских домах смертность доходила до 75%.</p>
+                    <p>Уже 28 декабря 1917 года был создан Отдел охраны материнства и детства при Наркомате социального обеспечения. Под руководством Семашко развивалась система женских консультаций, яслей, детских садов и домов матери и ребёнка. ВЧК под руководством Дзержинского решила проблему беспризорников, устроив миллионы детей в специальные учреждения.</p>
+                    <p>В 1922 году в Кодексе законов о труде появились прогрессивные нормы: отпуск по беременности и родам (112 дней), запрет дискриминации беременных, перерывы для кормления, запрет на ночные работы и командировки для матерей. Матерям детей до 12 лет предоставлялся оплачиваемый больничной для ухода за ребёнком.</p>
+                    <p>Почти в каждом селе работал фельдшерско-акушерский пункт с дипломированной акушеркой, которая вела беременных, принимала роды и осуществляла патронажные осмотры. Врач-педиатр выезжал на дом к больным детям — услуга, недоступная в большинстве стран сегодня.</p>
+                    <p>Была развёрнута сеть «молочных кухонь» со специальным детским питанием. Молочные продукты, детские товары, пионерские лагеря и проезд в транспорте дотировались государством.</p>
+                    <p>Результат не замедлил сказаться: детская смертность снизилась более чем вдвое даже в период Гражданской войны. К 1961 году она упала в 9 раз по сравнению с дореволюционным уровнем — до 30 случаев на 1000, а нынешнее снижение до 8 промилле достигнуто во многом благодаря сохранению элементов советской системы.</p>
+                </div>
+            </div>
+            <div>
+                <img src="https://cs20.pikabu.ru/s/2026/04/06/15/ogkcbc4v.jpg" alt="Советская больница" style="width:100%; border-radius:8px; box-shadow:0 4px 15px rgba(0,0,0,0.1);">
+                <p style="text-align:center; color:#666; font-size:0.9rem; margin-top:0.5rem;">Советская поликлиника</p>
+                <p></p>
+                <img src="https://webkamerton.ru/sites/default/files/wp-content/thumbnails/skrinshot-28-12-2022-014534.jpg" alt="Материнство" style="width:100%; border-radius:8px; box-shadow:0 4px 15px rgba(0,0,0,0.1);">
+                <p style="text-align:center; color:#666; font-size:0.9rem; margin-top:0.5rem;">Материнство</p>
+                <p></p>
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/Awards_of_the_USSR-1945._CPA_984.jpg/500px-Awards_of_the_USSR-1945._CPA_984.jpg" alt="Почтовая марка СССР с изображением медали" style="width:100%; border-radius:8px; box-shadow:0 4px 15px rgba(0,0,0,0.1);">
+                <p style="text-align:center; color:#666; font-size:0.9rem; margin-top:0.5rem;">Почтовая марка СССР с изображением медали</p> 
+<img src="https://data.cyclowiki.org/images/f/f0/%D0%9C%D0%BE%D0%BB%D0%BE%D1%87%D0%BD%D0%B0%D1%8F_%D0%BA%D1%83%D1%85%D0%BD%D1%8F_%D0%A1%D0%A1%D0%A1%D0%A0.jpg" alt="Молочная кухня" style="width:100%; border-radius:8px; box-shadow:0 4px 15px rgba(0,0,0,0.1);">
+                <p style="text-align:center; color:#666; font-size:0.9rem; margin-top:0.5rem;">Молочная кухня</p> 
+            </div>
+        </div>
+
+        <div class="expandable-card" onclick="this.classList.toggle('open')">
+            <div class="expandable-header">
+                <h3>💊 Система здравоохранения: достижения и проблемы</h3>
+                <span class="expandable-toggle">▼</span>
+            </div>
+            <div class="expandable-body">
+                <p>Советская система здравоохранения была одной из крупнейших в мире. Она охватывала всё население страны — от огромных городов до отдалённых деревень.</p>
+                <p><strong>Достижения:</strong></p>
+                <ul>
+                    <li>Почти полное искоренение эпидемических болезней (чума, холера, тиф)</li>
+                    <li>Снижение детской смертности в несколько раз</li>
+                    <li>Увеличение средней продолжительности жизни с 32 лет (1917) до 70 лет (1980-е)</li>
+                    <li>Развитие педиатрии, акушерства, хирургии</li>
+                    <li>Бесплатные лекарства для тяжелобольных</li>
+                </ul>
+                <p><strong>Проблемы:</strong></p>
+                <ul>
+                    <li>Дефицит современного оборудования и лекарств</li>
+                    <li>Низкая зарплата медперсонала</li>
+                    <li>Очереди к специалистам</li>
+                    <li>Отсутствие альтернативной медицины</li>
+                    <li>Скрытие информации об эпидемиях (например, СПИД в 1980-х)</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="expandable-card" onclick="this.classList.toggle('open')">
+            <div class="expandable-header">
+                <h3>🛡️ Социальные гарантии</h3>
+                <span class="expandable-toggle">▼</span>
+            </div>
+            <div class="expandable-body">
+<div class="info-block" style="border-left-color: #2c5282; background: #f0f4f8;">
+    <h4>📜 Первичный источник</h4>
+    <p style="font-style: italic; margin-bottom: 0.8rem;">
+        «Статья 118. Граждане СССР имеют право на труд...<<br>
+        Статья 119. Граждане СССР имеют право на отдых...<<br>
+        Статья 120. Граждане СССР имеют право на материальное обеспечение в старости, 
+        а также в случае болезни и потери трудоспособности...<<br>
+        Статья 121. Граждане СССР имеют право на образование»
+    </p>
+    <p style="font-size: 0.9rem; color: #666; margin-bottom: 0;">
+        <strong>Конституция СССР 1936 г.</strong> (т.н. «сталинская конституция») — 
+        закрепила социальные права граждан на уровне основного закона, 
+        став образцом для послевоенных конституций социалистических стран.
+    </p>
+</div>
+                <p>Советское государство брало на себя заботу о гражданах «от колыбели до могилы». Это было не просто лозунгом, а реальной политикой.</p>
+                <ul>
+                    <li><strong>Гарантированная занятость</strong> — безработица формально отсутствовала</li>
+                    <li><strong>Бесплатное образование</strong> — от детского сада до аспирантуры</li>
+                    <li><strong>Бесплатная медицина</strong> — поликлиники, больницы, санатории</li>
+                    <li><strong>Бесплатное жильё</strong> — право на квартиру (в очереди)</li>
+                    <li><strong>Пенсии</strong> — мужчинам с 60, женщинам с 55 лет</li>
+                    <li><strong>Отпуск</strong> — минимум 15 рабочих дней (позже 24)</li>
+                    <li><strong>Льготы</strong> — для ветеранов, инвалидов, многодетных семей</li>
+                </ul>
+                <p>Цена этих гарантий — низкие зарплаты, отсутствие выбора, зависимость от государства.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="social">
+        <h2 class="section-title">Социальные и общественные отношения</h2>
+        <p class="section-desc">Семья, дружба, соседские связи и роль общественных организаций в жизни советских людей</p>
+
+        <div class="cards-grid">
+            <div class="card">
+                <img src="https://resizer.mail.ru/p/8f0d8f9a-229a-5f7e-81a7-9d5758e8fccb/AQAFuaG-VUfYRMkvHgg4aiO9sts8739YQ-XUbhr6RRw_6cU5eSDg_L6HE5mXhqQpTJ8_b9qzltP-AbulUGDfVzgxySM.jpg" alt="Советская семья" class="card-image">
+                <div class="card-body">
+                    <h3 class="card-title">Семья и родственные связи</h3>
+                    <p class="card-text">Семья была основой общества. Многодетные семьи поощрялись: матери-героини получали ордена и льготы. Разводы были возможны, но осуждались обществом. Бабушки и дедушки играли огромную роль — часто воспитывали внуков, пока родители работали. Три поколения под одной крышей — норма.</p>
+                </div>
+            </div>
+            <div class="card">
+                <img src="https://cdnimages.absatz.media/images/2025.07/original/1280_68764451b09c6020d39061f8.jpg" alt="Соседи" class="card-image">
+                <div class="card-body">
+                    <h3 class="card-title">Соседские связи</h3>
+                    <p class="card-text">В коммуналках и даже в отдельных квартирах соседи знали друг о друге всё. «Соседка напротив» — источник сплетен, помощи и конфликтов. Общая кухня, общий двор, общий подъезд — всё способствовало тесному общению. Праздники отмечались вместе: свадьбы, дни рождения, Новый год.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="expandable-card" onclick="this.classList.toggle('open')">
+            <div class="expandable-header">
+                <h3>👥 Социальные слои советского общества</h3>
+                <span class="expandable-toggle">▼</span>
+            </div>
+            <div class="expandable-body">
+                <p>Советское общество официально считалось бесклассовым. Но на практике существовала чёткая иерархия:</p>
+                <ul>
+                    <li><strong>Номенклатура</strong> — партийная элита, высшие чины, руководители предприятий. Имели доступ к спецраспределителям, закрытым магазинам, дачам, иномаркам.</li>
+                    <li><strong>Интеллигенция</strong> — учёные, врачи, инженеры, учителя, художники. Уважаемые, но не богатые. Жили на зарплату, часто подрабатывали.</li>
+                    <li><strong>Рабочий класс</strong> — «главная движущая сила». Формально привилегированный класс. Работали на заводах, получали среднюю зарплату.</li>
+                    <li><strong>Колхозники</strong> — сельское население. До 1960-х не имели паспортов, не могли свободно переезжать в город. Жили беднее городских жителей.</li>
+                    <li><strong>Военные</strong> — особая каста. Высокий статус, льготы, отдельные магазины, санатории.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="expandable-card" onclick="this.classList.toggle('open')">
+            <div class="expandable-header">
+                <h3>🤝 Дружба и круг общения</h3>
+                <span class="expandable-toggle">▼</span>
+            </div>
+            <div class="expandable-body">
+                <p>В советском обществе дружба имела особое значение. «Друг детства», «товарищ по работе», «сосед по комнате в общежитии» — эти связи часто сохранялись на всю жизнь. Дружба помогала решать проблемы: достать дефицит, устроить на работу, помочь с ремонтом.</p>
+                <p><strong>Общественные организации:</strong></p>
+                <ul>
+                    <li><strong>Профсоюзы</strong> — защита прав работников, распределение путёвок</li>
+                    <li><strong>Кружки по интересам</strong> — фотография, радиотехника, вышивание, шахматы</li>
+                    <li><strong>Спортивные секции</strong> — футбол, хоккей, гимнастика, плавание</li>
+                    <li><strong>Творческие коллективы</strong> — хоры, оркестры, театральные студии</li>
+                    <li><strong>Добровольные общества</strong> — ОСВОД, ДОСААФ, общество охотников</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="ideologia">
+        <h2 class="section-title">Идеология и пропаганда</h2>
+        <p class="section-desc">Как государство формировало сознание граждан через СМИ, символы и героев советской эпохи</p>
+
+        <div class="cards-grid">
+            <div class="card">
+                <img src="https://upload.wikimedia.org/wikipedia/ru/thumb/f/f7/Ussr0437.jpg/250px-Ussr0437.jpg" alt="Советский плакат" class="card-image">
+                <div class="card-body">
+                    <h3 class="card-title">Советские плакаты</h3>
+                    <p class="card-text">Агитационное искусство проникало в каждый дом. Плакаты призывали к труду, к защите Родины, к коллективизму. Художники как Виктор Иванов и Ираклий Тоидзе создавали образы, которые стали культовыми. Плакат «Родина-мать зовёт!» стал символом Великой Отечественной войны.</p>
+                </div>
+            </div>
+            <div class="card">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/Stamp_of_USSR_1953.jpg/500px-Stamp_of_USSR_1953.jpg" alt="Почтовая марка СССР, 1956 г. Посвящена Дню строителя. " class="card-image">
+                <div class="card-body">
+                    <h3 class="card-title">Городская среда</h3>
+                    <p class="card-text">Улицы украшались лозунгами, портретами вождей, памятниками. Архитектура «сталинских высоток» и панельных домов создавала особый облик советских городов — от монументального до функционального. Каждый город имел площадь Ленина, улицу Гагарина, парк Победы.</p>
+                </div>
+            </div>
+            <div class="card">
+                <img src="https://www.amic.ru/images/news/news/439241_size1.jpg" alt="Парад на Красной площади" class="card-image">
+                <div class="card-body">
+                    <h3 class="card-title">Праздники и демонстрации</h3>
+                    <p class="card-text">1 мая (День труда) — весенние шествия и демонстрации рабочих и 7 ноября (День Октябрьской революции) — главный праздник страны с масштабными военными парадами. Новый год — самый любимый праздник с елкой, Дедом Морозом и застольем. 9 мая — День Победы, парады, чествование ветеранов и день памяти.</p>
+                </div>
+            </div>
+            <div class="card">
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTECQB0F6YeCSBjcu4Ru9-CC6gBF9UUlhYhOg&s" alt="Советское телевидение" class="card-image">
+                <div class="card-body">
+                    <h3 class="card-title">СМИ и культура</h3>
+                    <p class="card-text">Главное телевидение — ЦТ СССР, программа «Время», радио «Маяк». Кино было мощным пропагандистским инструментом: «Офицеры», «Ирония судьбы», «Место встречи изменить нельзя». Каждый фильм нёс идеологический посыл. Газеты «Правда» и «Известия» формировали общественное мнение.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="expandable-card" onclick="this.classList.toggle('open')">
+            <div class="expandable-header">
+                <h3>📺 Пропаганда в советском обществе</h3>
+                <span class="expandable-toggle">▼</span>
+            </div>
+            <div class="expandable-body">
+                <p>Пропаганда пронизывала всю жизнь советского человека: от утренней зарядки до вечернего выпуска новостей. Её цель — формирование «нового советского человека»: коллективиста, патриота, трудоголика.</p>
+                <p><strong>Инструменты пропаганды:</strong></p>
+                <ul>
+                    <li><strong>Телевидение и радио</strong> — единые программы для всей страны, контроль содержания</li>
+                    <li><strong>Пресса</strong> — «Правда», «Известия», «Комсомольская правда» — официальная точка зрения</li>
+                    <li><strong>Кино</strong> — «Офицеры», «Ирония судьбы», «Место встречи изменить нельзя» — каждый фильм нёс мораль</li>
+                    <li><strong>Литература</strong> — социалистический реализм, обязательная идеологическая составляющая</li>
+                    <li><strong>Образование</strong> — история, обществоведение, начальная военная подготовка</li>
+                    <li><strong>Пионерская и комсомольская организации</strong> — воспитание с раннего возраста</li>
+                </ul>
+                <p><strong>Герои пропаганды:</strong></p>
+                <ul>
+                    <li><strong>Рабочие</strong> — Алексей Стаханов, рекордсмен добычи угля</li>
+                    <li><strong>Колхозники</strong> — Марина Раскова, лётчица</li>
+                    <li><strong>Военные</strong> — маршал Жуков, герои Великой Отечественной</li>
+                    <li><strong>Космонавты</strong> — Юрий Гагарин, первый человек в космосе</li>
+                    <li><strong>Учёные</strong> — Игорь Курчатов, создатель атомной бомбы</li>
+                </ul>
+            </div>
+        </div>
+<div class="info-block" style="border-left-color: #6b46c1; background: #faf5ff;">
+    <h4>⚖️ Контрвзгляд: почему пропаганда работала</h4>
+    <p>Исследователи (Фицпатрик, Хансен) показывают, что советская идеология была эффективна не только благодаря репрессиям:</p>
+    <ul style="padding-left: 1.5rem; margin-top: 0.5rem;">
+        <li><strong>«Малая мобилизация»</strong> — люди искренне верили в возможность «построить социализм», особенно в 1930-е (эффект «вовлечённости»)</li>
+        <li><strong>Прагматическое принятие</strong> — даже скептики соблюдали ритуалы (парады, членские взносы), чтобы не потерять доступ к благам</li>
+        <li><strong>«Двойное сознание» (Алексей Юрчак)</strong> — люди одновременно знали официальную ложь и говорили её, не воспринимая как ложь</li>
+        <li><strong>Конформизм как выживание</strong> — открытое несогласие было невыгодно, но это не значит, что все были «зомбированы»</li>
+    </ul>
+    <p style="font-size: 0.85rem; color: #666; margin-top: 0.8rem;">
+        <em>См.: Юрчак А. Это было навсегда, пока не кончилось. Последнее советское поколение. М., 2014; 
+        Фицпатрик Ш. Повседневный сталинизм. М., 2001.</em>
+    </p>
+</div>
+        <div class="expandable-card" onclick="this.classList.toggle('open')">
+            <div class="expandable-header">
+                <h3>🎭 Культура и искусство</h3>
+                <span class="expandable-toggle">▼</span>
+            </div>
+            <div class="expandable-body">
+                <p>Советская культура была мощным инструментом идеологии. Но при этом она давала миру выдающихся художников, писателей, композиторов.</p>
+                <p><strong>Литература:</strong> Максим Горький, Михаил Шолохов, Александр Солженицын (позже запрещён), братья Стругацкие. Обязательный жанр — социалистический реализм.</p>
+                <p><strong>Музыка:</strong> классика — Шостакович, Прокофьев, Хачатурян. Эстрада — Алла Пугачёва, Владимир Высоцкий, Булат Окуджава. Песни военных лет — «Катюша», «Священная война».</p>
+                <p><strong>Кино:</strong> «Броненосец Потёмкин», «Чапаев», «Иван Грозный», «Летят журавли», «Офицеры». Каждый фильм проходил цензуру.</p>
+                <p><strong>Театр:</strong> МХАТ, Большой театр, Мариинский. Классика — Чехов, Гоголь, Островский. Советская драматургия — Вишневский, Погодин.</p>
+            </div>
+        </div>
+
+        <div class="info-block">
+            <h4>📺 СМИ и культура</h4>
+            <p>Главное телевидение — ЦТ СССР, программа «Время», радио «Маяк». Кино было мощным пропагандистским инструментом: «Офицеры», «Ирония судьбы», «Место встречи изменить нельзя». Каждый фильм нёс идеологический посыл. Газеты «Правда» и «Известия» формировали общественное мнение. При этом советская культура дала миру выдающихся художников: Шостаковича, Прокофьева, Тарковского, Высоцкого.</p>
+        </div>
+    </section>
+
+    <section class="section" id="anomalii">
+        <h2 class="section-title">Аномалии и девиации</h2>
+        <p class="section-desc">Традиционные отклонения в новом обществе: пьянство, наркотики, самоубийства и проституция по имеющимся историческим данным</p>
+
+        <div class="cards-grid">
+            <div class="card">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/56/%D0%A1_%D0%B1%D1%83%D0%BA%D0%B2%D0%BE%D0%B9_%D0%9E_%E2%80%94_%D1%81%D0%B8%D0%BB%D0%B0%2C_%D1%81_%D0%B1%D1%83%D0%BA%D0%B2%D0%BE%D0%B9_%D0%98_%E2%80%94_%D0%BC%D0%BE%D0%B3%D0%B8%D0%BB%D0%B0.jpg/500px-%D0%A1_%D0%B1%D1%83%D0%BA%D0%B2%D0%BE%D0%B9_%D0%9E_%E2%80%94_%D1%81%D0%B8%D0%BB%D0%B0%2C_%D1%81_%D0%B1%D1%83%D0%BA%D0%B2%D0%BE%D0%B9_%D0%98_%E2%80%94_%D0%BC%D0%BE%D0%B3%D0%B8%D0%BB%D0%B0.jpg" alt="Антиалкогольный плакат" class="card-image">
+                <div class="card-body">
+                    <h3 class="card-title">Пьянство — бич советского общества</h3>
+                    <p class="card-text">По имеющимся данным, антиалкогольная утопия большевиков провалилась. С 1920-х годов началась борьба с «зелёным змием», но к эпохе «большого стиля» пьянство стало массовым явлением. В 1930-е годы появились «диспансеры» для лечения алкоголизма. Во время войны Сталин ввёл «сто грамм» — 100 граммов водки для солдат. После войны пьянство стало нормой: «Выпьем за победу!» — тост, который звучал на каждом застолье.</p>
+                </div>
+            </div>
+            <div class="card">
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQrQO8XUz0eIexU6qzaWcwAH-G4ZgnpkMeVsA&s" alt="50-60-е гг" class="card-image">
+                <div class="card-body">
+                    <h3 class="card-title">Наркотики и ретретизм</h3>
+                    <p class="card-text">Наркомания в СССР существовала на протяжении всей истории государства, вопреки официальной идеологической доктрине, утверждавшей, что это явление свойственно исключительно капиталистическим странам. Информация о масштабах проблемы долгое время находилась под грифом «Секретно» и стала открыто обсуждаться только в эпоху Перестройки.</p>
+                </div>
+            </div>
+            <div class="card">
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRvye6Fm9SJj8Bs-AYDikMNsu9JfmtshD3VIA&s" alt="Плакат против проституции" class="card-image">
+                <div class="card-body">
+                    <h3 class="card-title">Проституция — «долой безобразников»</h3>
+                    <p class="card-text">«Коммунизм — могила проституции» — так гласил лозунг. Но реальность была иной. В 1920-е годы проституция процветала из-за голода и разрухи. В 1930-е — из-за дефицита товаров. Женщины продавали себя за продукты, одежду, «блат». Система борьбы была жестокой: аресты, принудительное лечение венерических заболеваний, отправка в «дома трудолюбия». Но проблема не исчезала — она уходила в подполье.</p>
+                </div>
+            </div>
+            <div class="card">
+                <img src="http://medpsy.ru/mprj/pict2013/pic13_2_17_6.jpg" alt="Кисловодская психиатрическая больница, 1983 год" class="card-image">
+                <div class="card-body">
+                    <h3 class="card-title">Самоубийства — тайная эпидемия</h3>
+                    <p class="card-text">СССР занимал одно из первых мест в мире по количеству самоубийств, однако эта статистика была государственной тайной. Официальная идеология утверждала, что суицид — это пережиток капитализма, поэтому данные Госкомстата и Минздрава СССР находились под грифом «Секретно» вплоть до 1989 года.</p>
+		    <p class="card-text">Система профилактики самоубийств в СССР базировалась на передовом междисциплинарном подходе, разработанном в 1970–1980-х годах во главе с профессором А.Г. Амбрумовой. Главный упор делался не столько на психиатрию (большинство суицидентов были психически здоровы), сколько на социально-психологическую помощь.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="expandable-card" onclick="this.classList.toggle('open')">
+            <div class="expandable-header">
+                <h3>🍷 Антиалкогольная политика: от утопии к реальности</h3>
+                <span class="expandable-toggle">▼</span>
+            </div>
+            <div class="expandable-body">
+                <p>Большевики пришли к власти с идеей трезвости. В 1914 году царское правительство ввело «сухой закон», и большевики его сохранили. Но уже в 1920-е годы началась «рыковка» — подпольное производство самогона. Государство пыталось монополизировать продажу спиртного — появилась «советская монополька».</p>
+                <p>По имеющимся данным, в 1930-е годы пьянство стало массовым. Рабочие пили на заводах, в столовых, в подсобках. «Его не вылечит, наверно, диспансер» — так писали в медицинских справках. Во время войны Сталин лично разрешил «сто грамм» для солдат — и это стало традицией.</p>
+                <p>После войны пьянство стало частью культуры: «Выпьем за победу!», «До дна!», «Чтоб не было мучительно больно...». Алкоголь был доступен, дёшев и единственный способ расслабиться в условиях тоталитарного давления.</p>
+                <ul>
+                    <li><strong>Антиалкогольная кампания 1985 года</strong> — попытка Горбачёва сократить потребление спиртного. Привела к дефициту сахара (для самогона) и росту теневой экономики.</li>
+                    <li><strong>«Диспансеры»</strong> — специальные учреждения для «лечения» алкоголиков. На практике — скорее места принудительного содержания.</li>
+                    <li><strong>«Трудовые колонии»</strong> — для наркоманов и алкоголиков. Принудительный труд как метод «лечения».</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="expandable-card" onclick="this.classList.toggle('open')">
+            <div class="expandable-header">
+                <h3>👁️ Ретретизм — наркотики и самоубийства</h3>
+                <span class="expandable-toggle">▼</span>
+            </div>
+            <div class="expandable-body">
+                <p><strong>«Ретретизм»</strong> — термин, использованный для обозначения ухода от реальности через наркотики и самоубийства.</p>
+<p><strong>1920-е годы:</strong> Всплеск после Первой мировой и Гражданской войн. Среди беспризорников и маргинальных слоев был массово распространен немецкий кокаин, а в богемной и медицинской среде — морфий.</p>
+<p>Всплеск суицидов после Гражданской войны. Была популярна «есенинщина» (романтизация самоубийства среди молодежи). В этот период статистика еще публиковалась: уровень составлял около 9–10 случаев на 100 000 населения.</p>
+<p><strong>1930–1950-е годы:</strong> Введение жесткого контроля. В 1934 году вышло постановление ЦИК и СНК СССР, запрещающее свободный посев опийного мака и индийской конопли. Потребление снизилось, но очаги сохранялись в Средней Азии, на Кавказе и в криминальной среде. В послевоенные годы проблему усугубил «медицинский» морфинизм среди раненых фронтовиков.</p>
+<p>Полное засекречивание данных. Суицид маргинализировался и рассматривался как контрреволюционный акт или дезертирство. Волна самоубийств прокатилась во время раскулачивания, сталинских репрессий и сразу после начала Великой Отечественной войны.</p>
+<p><strong>1960–1970-е годы:</strong> Формирование теневого рынка. Появились первые закрытые группы потребителей, использовавшие дикорастущую коноплю (Чуйская долина) и маковую солому («кукнар»). Началось распространение аптечной наркомании (кодеиносодержащие лекарства, эфедрин).</p>
+<p>Непрерывный рост. К концу 1970-х годов СССР вошел в зону «критического уровня» по классификации ВОЗ (более 20 случаев на 100 000 человек).</p>
+<p><strong>1980-е годы:</strong> Масштабный кризис. Война в Афганистане повлекла за собой резкий приток дешевого и сильного афганского опиума и героина. В это же время среди советской молодежи начался бум кустарного производства тяжелых суррогатных наркотиков («винт», «ханка»)</p>
+<p>Пик (1984 год): Абсолютный исторический максимум советского периода. Уровень суицидов достиг 39,7 случаев на 100 000 населения. Ежегодно добровольно уходили из жизни около 80 тысяч советских граждан.</p>
+<p><strong>Спад (1985–1987 годы):</strong> В начале Перестройки уровень самоубийств резко снизился на 30–35% (до 26 случаев на 100 000). Историки и социологи связывают это с Горбачевской антиалкогольной кампанией и общим подъемом надежд на перемены в обществе.</p>
+<p>Распад СССР и открытие границ в начале 1990-х годов привели к тому, что накопленный скрытый потенциал советской наркомании столкнулся с мощным потоком тяжелых контрабандных наркотиков, что вызвало масштабную эпидемию зависимости на всем постсоветском пространстве.</p>
+            </div>
+        </div>
+
+        <div class="expandable-card" onclick="this.classList.toggle('open')">
+            <div class="expandable-header">
+                <h3>💋 Проституция — «долой безобразников по женской линии»</h3>
+                <span class="expandable-toggle">▼</span>
+            </div>
+            <div class="expandable-body">
+                <p>«Коммунизм — могила проституции» — так гласил лозунг. Но реальность была иной.</p>
+                <p><strong>1920-е годы (НЭП):</strong> Расцвет открытой проституции. Секс-услуги были легальными, но регулируемыми. В крупных городах действовали биржи труда для бывших проституток, создавались профилактории для их переобучения. По разным оценкам, в одной только Москве в середине 1920-х насчитывалось до 30 тысяч секс-работниц.</p>
+
+<p><strong>1930–1950-е годы:</strong> Сталинский курс на «искоренение». Проституция была объявлена ликвидированной. Секс-работниц начали массово задерживать и отправлять в лагеря ГУЛАГа или в ссылку как «социально-опасных элементов» (СОЭ). Борьба велась через уголовные статьи за сутенерство и содержание притонов.</p>
+<p><strong>1960–1970-е годы:</strong> Эпоха скрытого рынка. Появилась четкая иерархия и специализация. Секс-услуги переместились в гостиницы, рестораны и на вокзалы. Проблема полностью замалчивалась в СМИ.</p>
+<p><strong>1980-е годы (Перестройка):</strong> Легализация темы. В 1986 году в газете «Московский комсомолец» вышел первый открытый очерк журналиста Евгения Додолева о советских путанах. В 1987 году Указом Президиума Верховного Совета РСФСР была впервые введена административная ответственность за занятие проституцией (штраф от 100 до 200 рублей).</p>
+<p>В 1988 году вышла повесть Владимира Кунина «Интердевочка», а в 1989 году — одноименный фильм Петра Тодоровского. Картина стала абсолютным лидером проката и открыла советскому обществу глаза на масштаб проблемы. Фильм показал, что для многих советских девушек профессия валютной проститутки стала пределом мечтаний из-за возможности уехать на Запад и получить доступ к роскошной жизни, недоступной обычному советскому человеку.</p>
+            </div>
+        </div>
+
+        </section>
+
+    <section class="section" id="gallery">
+        <h2 class="section-title">Визуальная хроника</h2>
+        <p class="section-desc">Фотографии эпохи: от повседневности до праздников. Нажмите на изображение, чтобы увеличить.</p>
+        <div class="gallery">
+            <div class="gallery-item" onclick="openLightbox(this)">
+                <img src="https://news.store.rambler.ru/img/d8d7f09d743f79bdb93bb85b21c14ae1?img-format=auto&img-1-resize=height:400,fit:max&img-2-filter=sharpen" alt="Интерьер типичной советской квартиры">
+                <div class="gallery-caption">Интерьер советской квартиры с мебелью стандартных серий</div>
+            </div>
+            <div class="gallery-item" onclick="openLightbox(this)">
+                <img src="https://cs10.pikabu.ru/post_img/big/2019/10/31/9/157253657217922509.jpg" alt="Улица советского города">
+                <div class="gallery-caption">Улица советского города, 1960-е годы</div>
+            </div>
+            <div class="gallery-item" onclick="openLightbox(this)">
+                <img src="https://kimi-web-img.moonshot.cn/img/www.qminder.com/7fe06716a6fc4d6f6742bc4b60e73fad587cb25f.png" alt="Очередь в магазин">
+                <div class="gallery-caption">Очередь за товарами — типичная картина советской жизни</div>
+            </div>
+            <div class="gallery-item" onclick="openLightbox(this)">
+                <img src="https://kimi-web-img.moonshot.cn/img/npr.brightspotcdn.com/5f81e3bc7af5b02d85264a8d523092a71f54cfea" alt="Советская дача">
+                <div class="gallery-caption">Деревянная дача — место отдыха и огородничества</div>
+            </div>
+            <div class="gallery-item" onclick="openLightbox(this)">
+                <img src="https://kimi-web-img.moonshot.cn/img/galinabulakh.wordpress.com/205fa0c445e904e21e54d8c6fa023724207ca9bd.jpg" alt="Советский класс">
+                <div class="gallery-caption">Советский школьный класс с портретами вождей</div>
+            </div>
+            <div class="gallery-item" onclick="openLightbox(this)">
+                <img src="https://cs20.pikabu.ru/s/2025/12/04/17/sprkx762_lg.jpg" alt="Москвич">
+                <div class="gallery-caption">Автомобиль «Москвич» — мечта многих советских семей</div>
+            </div>
+            <div class="gallery-item" onclick="openLightbox(this)">
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS85HAt00diAcdDY8S0H2ECv9eAuBQVfAA2Tg&s" alt="Советская кухня">
+                <div class="gallery-caption">Типичная советская кухня с газовой плитой и посудой</div>
+            </div>
+            <div class="gallery-item" onclick="openLightbox(this)">
+                <img src="https://kimi-web-img.moonshot.cn/img/mf.b37mrtl.ru/bccc24035d4fd8ec7bcc5aea548968b6b99697ea.jpg" alt="Советский телевизор">
+                <div class="gallery-caption">Телевизор «Рубин» — окно в мир для миллионов семей</div>
+            </div>
+            <div class="gallery-item" onclick="openLightbox(this)">
+                <img src="https://travelask.ru/system/images/files/001/444/760/wysiwyg_jpg/51.jpg?1606651934" alt="Советская столовая">
+                <div class="gallery-caption">Столовая при заводе — место, где кормили дёшево и сытно</div>
+            </div>
+            <div class="gallery-item" onclick="openLightbox(this)">
+                <img src="https://n1s1.hsmedia.ru/6e/08/59/6e0859c771fa4ab1a40f288d2d33dd45/1200x775_0x8Xq4AmTD_6719404886225476387.jpg" alt="Школьная доска">
+                <div class="gallery-caption">Школьная доска с классной работой — типичный урок</div>
+            </div>
+            <div class="gallery-item" onclick="openLightbox(this)">
+                <img src="https://kimi-web-img.moonshot.cn/img/mf.b37mrtl.ru/278111afd42fff109105ad6bc43b62268fa0ae1e.jpg" alt="Советская поликлиника">
+                <div class="gallery-caption">Поликлиника — бесплатная медицинская помощь для всех</div>
+            </div>
+            <div class="gallery-item" onclick="openLightbox(this)">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/1/1d/%D0%9F%D0%B0%D1%80%D0%B0%D0%B4_%D0%9F%D0%BE%D0%B1%D0%B5%D0%B4%D1%8B_1985_%D0%B3%D0%BE%D0%B4%D0%B0._%D0%9D%D0%B0_%D0%9A%D1%80%D0%B0%D1%81%D0%BD%D0%BE%D0%B9_%D0%BF%D0%BB%D0%BE%D1%89%D0%B0%D0%B4%D0%B8_%D0%97%D0%BD%D0%B0%D0%BC%D1%8F_%D0%9F%D0%BE%D0%B1%D0%B5%D0%B4%D1%8B.jpg" alt="Парад на Красной площади">
+                <div class="gallery-caption">Парад на Красной площади — демонстрация мощи государства</div>
+            </div>
+        </div>
+    </section>
+
+    <div class="lightbox" id="lightbox" onclick="closeLightbox()">
+        <span class="lightbox-close">&times;</span>
+        <img src="" alt="" id="lightbox-img">
+        <div class="lightbox-caption" id="lightbox-caption"></div>
+    </div>
+
+    <section class="section" id="tasks">
+        <h2 class="section-title">Интерактивные задания</h2>
+        <p class="section-desc">Проверь свои знания о советской эпохе с помощью викторины из 15 вопросов</p>
+
+        <div class="quiz-container" id="quiz-container">
+            <div class="quiz-progress" id="quiz-progress">Вопрос 1 из 15</div>
+            <div class="quiz-question" id="quiz-question"></div>
+            <div class="quiz-options" id="quiz-options"></div>
+            <div class="quiz-feedback" id="quiz-feedback"></div>
+            <div class="quiz-nav">
+                <button class="btn btn-secondary" id="quiz-prev" onclick="prevQuestion()" disabled>← Назад</button>
+                <button class="btn btn-primary" id="quiz-next" onclick="nextQuestion()" disabled>Далее →</button>
+            </div>
+        </div>
+
+        <div class="quiz-score" id="quiz-score" style="display:none;"></div>
+    </section>
+
+    <footer>
+        <h3>Советская повседневность</h3>
+        <p>Проект по истории, посвящённый исследованию жизни в Советском Союзе (1917–1991). Создан для образовательных целей.</p>
+        <p style="margin-top:1rem; font-size:0.85rem; opacity:0.6;">Изображения использованы из открытых источников</p>
+        <p style="margin-top:0.5rem; font-size:0.8rem; opacity:0.5;"></p>
+<div style="max-width: 900px; margin: 2rem auto 0; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.2); text-align: left;">
+    <h4 style="color: var(--soviet-gold); font-family: 'Playfair Display', serif; margin-bottom: 1rem; text-align: center;">Источники и литература</h4>
+    
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; font-size: 0.8rem; line-height: 1.6; color: rgba(255,255,255,0.7);">
+        <div>
+            <h5 style="color: var(--soviet-gold); margin-bottom: 0.5rem; font-size: 0.85rem;">Первичные источники</h5>
+            <ul style="list-style: none; padding: 0;">
+                <li style="margin-bottom: 0.5rem;">• Конституция (Основной Закон) СССР 1936 г. // Ведомости Верховного Совета СССР. 1936. № 52.</li>
+                <li style="margin-bottom: 0.5rem;">• Ленин В.И. Очередные задачи Советской власти. М.: Изд-во ВЦИК, 1918.</li>
+                <li style="margin-bottom: 0.5rem;">• Постановление ЦИК и СНК СССР «О борьбе с проституцией». 1934.</li>
+                <li style="margin-bottom: 0.5rem;">• Инструкция Всероссийской пионерской организации. М., 1922.</li>
+                <li style="margin-bottom: 0.5rem;">• Хрущёв Н.С. О культе личности и его последствиях. Доклад на XX съезде КПСС. М., 1956.</li>
+                <li style="margin-bottom: 0.5rem;">• Указ Президиума Верховного Совета СССР «О кооперации в СССР». 1988.</li>
+            </ul>
+        </div>
+        <div>
+            <h5 style="color: var(--soviet-gold); margin-bottom: 0.5rem; font-size: 0.85rem;">Исследования и мемуары</h5>
+            <ul style="list-style: none; padding: 0;">
+                <li style="margin-bottom: 0.5rem;">• Берберова Н. Курсив мой. Автобиография, 1969 г.</li>
+                <li style="margin-bottom: 0.5rem;">• Фицпатрик Ш. Повседневный сталинизм: социальная история СССР в 30-е годы. М., 2001.</li>
+                <li style="margin-bottom: 0.5rem;">• Лебина Н.Б. Советская повседневность: нормы и аномалии. От военного коммунизма к большому стилю: 1920–1930-е годы, 2015.</li>
+<li style="margin-bottom: 0.5rem;">• Лебина Н.Б. Повседневная жизнь советского города: 1920–1930-е годы., 1999.</li>
+                <li style="margin-bottom: 0.5rem;">• Семашко Н.А. Очерки Народного комиссариата здравоохранения. М., 1922–1930.</li>
+                <li style="margin-bottom: 0.5rem;">• Вербицкая М.В. Народ и война: очерки истории Великой Отечественной войны. 1941–1945, М., 2010.</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div style="margin-top: 1.5rem; font-size: 0.75rem; color: rgba(255,255,255,0.5); text-align: center;">
+        Изображения использованы из открытых источников: РИА Новости, ТАСС, Wikimedia Commons, 
+        Государственный исторический музей.
+    </div>
+</div>
+    </footer>
+
+    <script>
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.timeline-item, .fade-in').forEach(el => observer.observe(el));
+
+        const sections = document.querySelectorAll('section[id]');
+        const navLinks = document.querySelectorAll('.nav-link');
+
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop - 100;
+                if (scrollY >= sectionTop) current = section.getAttribute('id');
+            });
+            navLinks.forEach(link => {
+                link.classList.toggle('active', link.getAttribute('href') === '#' + current);
+            });
+        });
+
+        function openLightbox(item) {
+            const img = item.querySelector('img');
+            const caption = item.querySelector('.gallery-caption').textContent;
+            document.getElementById('lightbox-img').src = img.src;
+            document.getElementById('lightbox-caption').textContent = caption;
+            document.getElementById('lightbox').classList.add('active');
+        }
+
+        function closeLightbox() {
+            document.getElementById('lightbox').classList.remove('active');
+        }
+
+        const quizData = [
+            {
+                question: "В каком году произошла Октябрьская революция?",
+                options: ["1914", "1917", "1922", "1918"],
+                correct: 1,
+                explanation: "Октябрьская революция произошла 25 октября (7 ноября) 1917 года."
+            },
+            {
+                question: "Как назывались массовые жилые дома, построенные в эпоху Хрущёва?",
+                options: ["Сталинки", "Хрущёвки", "Брежневки", "Панельки"],
+                correct: 1,
+                explanation: "«Хрущёвки» — пятиэтажные панельные дома, массово строившиеся в 1960-е годы."
+            },
+            {
+                question: "Какой цвет был у пионерского галстука?",
+                options: ["Синий", "Красный", "Зелёный", "Жёлтый"],
+                correct: 1,
+                explanation: "Пионерский галстук был красным — символ крови революционеров."
+            },
+            {
+                question: "Как называлась система распределения дефицитных товаров по спискам?",
+                options: ["Блат", "Спекуляция", "Талонная система", "Очередь"],
+                correct: 2,
+                explanation: "Талонная система позволяла покупать продукты по специальным талонам/карточкам."
+            },
+            {
+                question: "Какой период советской истории называют «Оттепелью»?",
+                options: ["1920-е", "1953–1964", "1964–1985", "1985–1991"],
+                correct: 1,
+                explanation: "Оттепель — период правления Н.С. Хрущёва (1953–1964), характеризовавшийся ослаблением репрессий."
+            },
+            {
+                question: "Какой автомобиль был самым массовым в СССР?",
+                options: ["Москвич", "Волга", "Жигули (ВАЗ-2101)", "Запорожец"],
+                correct: 2,
+                explanation: "«Жигули» (ВАЗ-2101) стал символом советского автопрома, их выпущено более 5 млн."
+            },
+            {
+                question: "Как называлась молодёжная коммунистическая организация?",
+                options: ["Партия", "Комсомол", "Профсоюз", "Кооператив"],
+                correct: 1,
+                explanation: "ВЛКСМ (Всесоюзный ленинский коммунистический союз молодёжи) или просто Комсомол."
+            },
+            {
+                question: "В каком году распался СССР?",
+                options: ["1989", "1990", "1991", "1992"],
+                correct: 2,
+                explanation: "26 декабря 1991 года СССР официально прекратил своё существование."
+            },
+            {
+                question: "Сколько союзных республик входило в состав СССР?",
+                options: ["12", "15", "16", "20"],
+                correct: 1,
+                explanation: "В СССР входило 15 союзных республик: РСФСР, Украина, Белоруссия, Молдавия, Литва, Латвия, Эстония, Грузия, Армения, Азербайджан, Казахстан, Узбекистан, Туркменистан, Таджикистан, Киргизия."
+            },
+            {
+                question: "Какой праздник считался главным в СССР?",
+                options: ["Новый год", "1 мая", "7 ноября", "9 мая"],
+                correct: 2,
+                explanation: "7 ноября — годовщина Октябрьской революции — был главным государственным праздником."
+            },
+            {
+                question: "Как называлась система, при которой выпускники вузов обязаны были работать по распределению?",
+                options: ["Отработка", "Распределение", "Обязательство", "Контракт"],
+                correct: 0,
+                explanation: "«Отработка» — 3 года обязательной работы по специальности после окончания вуза."
+            },
+            {
+                question: "Какой дефицитный продукт ассоциировался с советской эпохой больше всего?",
+                options: ["Хлеб", "Колбаса", "Молоко", "Сахар"],
+                correct: 1,
+                explanation: "Колбаса «Докторская» стала символом дефицита. За ней выстраивались огромные очереди."
+            },
+            {
+                question: "Кто возглавил Наркомздрав в 1918 году?",
+                options: ["Ленин", "Сталин", "Семашко", "Дзержинский"],
+                correct: 2,
+                explanation: "Н.А. Семашко — врач-эпидемиолог, выпускник Казанского университета, создатель системы здравоохранения."
+            },
+            {
+                question: "Как назывались принудительные учреждения для наркоманов и алкоголиков?",
+                options: ["Тюрьмы", "Лагеря", "Трудовые колонии", "Диспансеры"],
+                correct: 2,
+                explanation: "Трудовые колонии — специальные учреждения для «лечения» через принудительный труд."
+            },
+            {
+                question: "Какой метод борьбы с проституцией был характерен для 1930-х годов?",
+                options: ["Легализация", "Дома трудолюбия", "Социальная реабилитация", "Образование"],
+                correct: 1,
+                explanation: "«Дома трудолюбия» — принудительное содержание и «перевоспитание» женщин через труд."
+            }
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+        let answered = false;
+
+        function loadQuestion() {
+            answered = false;
+            const q = quizData[currentQuestion];
+            document.getElementById('quiz-question').textContent = q.question;
+            document.getElementById('quiz-progress').textContent = `Вопрос ${currentQuestion + 1} из ${quizData.length}`;
+            document.getElementById('quiz-feedback').className = 'quiz-feedback';
+            document.getElementById('quiz-feedback').textContent = '';
+            document.getElementById('quiz-next').disabled = true;
+            document.getElementById('quiz-prev').disabled = currentQuestion === 0;
+
+            const optsDiv = document.getElementById('quiz-options');
+            optsDiv.innerHTML = '';
+            q.options.forEach((opt, i) => {
+                const btn = document.createElement('button');
+                btn.className = 'quiz-option';
+                btn.textContent = opt;
+                btn.onclick = () => selectAnswer(i, btn);
+                optsDiv.appendChild(btn);
+            });
+        }
+
+        function selectAnswer(index, btn) {
+            if (answered) return;
+            answered = true;
+            const q = quizData[currentQuestion];
+            const options = document.querySelectorAll('.quiz-option');
+            options.forEach((opt, i) => {
+                opt.classList.add('disabled');
+                if (i === q.correct) opt.classList.add('correct');
+            });
+
+            const fb = document.getElementById('quiz-feedback');
+            if (index === q.correct) {
+                score++;
+                btn.classList.add('correct');
+                fb.className = 'quiz-feedback show correct-fb';
+                fb.textContent = '✅ Правильно! ' + q.explanation;
+            } else {
+                btn.classList.add('wrong');
+                fb.className = 'quiz-feedback show wrong-fb';
+                fb.textContent = '❌ Неправильно. ' + q.explanation;
+            }
+            document.getElementById('quiz-next').disabled = false;
+        }
+
+        function nextQuestion() {
+            currentQuestion++;
+            if (currentQuestion >= quizData.length) {
+                showResults();
+            } else {
+                loadQuestion();
+            }
+        }
+
+        function prevQuestion() {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                loadQuestion();
+            }
+        }
+
+        function showResults() {
+            document.getElementById('quiz-container').style.display = 'none';
+            const scoreDiv = document.getElementById('quiz-score');
+            scoreDiv.style.display = 'block';
+            const percent = Math.round((score / quizData.length) * 100);
+            let message = '';
+            if (percent === 100) message = '🏆 Отлично! Ты настоящий знаток советской истории!';
+            else if (percent >= 75) message = '🥈 Хороший результат! Ты хорошо разбираешься в теме.';
+            else if (percent >= 50) message = '🥉 Неплохо, но есть куда стремиться!';
+            else message = '📚 Стоит ещё раз прочитать материал и попробовать снова!';
+
+            scoreDiv.innerHTML = `
+                <div style="font-size:3rem; margin-bottom:1rem;">${percent >= 75 ? '⭐' : '📖'}</div>
+                <div style="font-size:2.5rem; margin-bottom:0.5rem;">${score} / ${quizData.length}</div>
+                <div style="font-size:1.2rem; color:#555;">${message}</div>
+                <button class="btn btn-primary" style="margin-top:1.5rem;" onclick="restartQuiz()">Пройти ещё раз</button>
+            `;
+        }
+
+        function restartQuiz() {
+            currentQuestion = 0;
+            score = 0;
+            document.getElementById('quiz-container').style.display = 'block';
+            document.getElementById('quiz-score').style.display = 'none';
+            loadQuestion();
+        }
+
+        loadQuestion();
+    </script>
+</body>
+</html>
